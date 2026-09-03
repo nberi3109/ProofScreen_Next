@@ -1,2 +1,19 @@
 import { CandidateApplication } from "@/types/candidate/application";
-export const candidateApplications: CandidateApplication[] = [{id:"app-1",jobId:"frontend",title:"Frontend Developer",company:"TechNova",status:"Proof requested",applied:"Applied yesterday"},{id:"app-2",jobId:"support",title:"Customer Support Executive",company:"Acme Services",status:"Under review",applied:"Applied 2 days ago"}];
+export const candidateApplications: CandidateApplication[] = [
+  {
+    id: "app-1",
+    jobId: "frontend",
+    title: "Frontend Developer",
+    company: "TechNova",
+    status: "Proof requested",
+    applied: "Applied yesterday",
+  },
+  {
+    id: "app-2",
+    jobId: "support",
+    title: "Customer Support Executive",
+    company: "Acme Services",
+    status: "Under review",
+    applied: "Applied 2 days ago",
+  },
+];

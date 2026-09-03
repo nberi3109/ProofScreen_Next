@@ -1,4 +1,81 @@
-import Link from "next/link";
 import { ArrowLeft, Check, Circle, MapPin } from "lucide-react";
+import Link from "next/link";
+
 import { recruiterCandidates } from "@/data/recruiter/candidates";
-export default async function CandidateDetail({ params }: { params: Promise<{candidateId:string}> }) { const {candidateId}=await params; const candidate=recruiterCandidates.find(item=>item.id===candidateId)||recruiterCandidates[0]; return <main className="recruiter-page narrow-recruiter-page"><Link href="/recruiter/candidates" className="recruiter-back"><ArrowLeft size={15}/> Back to candidates</Link><section className="candidate-profile-hero"><span className="avatar large-avatar">{candidate.initials}</span><div><span className="eyebrow">CANDIDATE PROFILE</span><h1>{candidate.name}</h1><p>{candidate.role} · <MapPin size={14}/> {candidate.location}</p></div><div className="profile-score"><b>{candidate.score}</b><small>Proof score</small></div></section><div className="detail-actions"><button className="primary-button">Shortlist candidate</button><button className="outline-button">Message candidate</button></div><div className="recruiter-detail-grid"><section className="recruiter-panel"><h2>Skills evidence</h2><div className="profile-skill-list">{candidate.skills.map(skill=><div key={skill.name}><span>{skill.evidence==="Verified"?<Check size={15}/>:<Circle size={15}/>} {skill.name}</span><b className={skill.evidence.toLowerCase().replace(" ","-")}>{skill.evidence}</b>{skill.score&&<strong>{skill.score}</strong>}</div>)}</div></section><section className="recruiter-panel"><h2>Candidate snapshot</h2><p><b>{candidate.experience}</b> experience</p><p>{candidate.availability}</p><p>Applied for <b>{candidate.appliedJob||"Open talent pool"}</b></p><hr/><h3>Recruiter notes</h3><textarea placeholder="Add a private note..." rows={4}/></section></div></main> }
+
+export default async function CandidateDetail({
+  params,
+}: {
+  params: Promise<{ candidateId: string }>;
+}) {
+  const { candidateId } = await params;
+  const candidate =
+    recruiterCandidates.find((item) => item.id === candidateId) ??
+    recruiterCandidates[0];
+
+  return (
+    <main className="recruiter-page narrow-recruiter-page">
+      <Link href="/recruiter/candidates" className="recruiter-back">
+        <ArrowLeft size={15} /> Back to candidates
+      </Link>
+
+      <section className="candidate-profile-hero">
+        <span className="avatar large-avatar">{candidate.initials}</span>
+        <div>
+          <span className="eyebrow">CANDIDATE PROFILE</span>
+          <h1>{candidate.name}</h1>
+          <p>
+            {candidate.role} · <MapPin size={14} /> {candidate.location}
+          </p>
+        </div>
+        <div className="profile-score">
+          <b>{candidate.score}</b>
+          <small>Proof score</small>
+        </div>
+      </section>
+
+      <div className="detail-actions">
+        <button className="primary-button">Shortlist candidate</button>
+        <button className="outline-button">Message candidate</button>
+      </div>
+
+      <div className="recruiter-detail-grid">
+        <section className="recruiter-panel">
+          <h2>Skills evidence</h2>
+          <div className="profile-skill-list">
+            {candidate.skills.map((skill) => (
+              <div key={skill.name}>
+                <span>
+                  {skill.evidence === "Verified" ? (
+                    <Check size={15} />
+                  ) : (
+                    <Circle size={15} />
+                  )}{" "}
+                  {skill.name}
+                </span>
+                <b className={skill.evidence.toLowerCase().replace(" ", "-")}>
+                  {skill.evidence}
+                </b>
+                {skill.score && <strong>{skill.score}</strong>}
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <section className="recruiter-panel">
+          <h2>Candidate snapshot</h2>
+          <p>
+            <b>{candidate.experience}</b> experience
+          </p>
+          <p>{candidate.availability}</p>
+          <p>
+            Applied for <b>{candidate.appliedJob ?? "Open talent pool"}</b>
+          </p>
+          <hr />
+          <h3>Recruiter notes</h3>
+          <textarea placeholder="Add a private note..." rows={4} />
+        </section>
+      </div>
+    </main>
+  );
+}
