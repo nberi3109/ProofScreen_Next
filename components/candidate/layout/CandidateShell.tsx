@@ -1,0 +1,4 @@
+import Link from "next/link";
+import { Bell } from "lucide-react";
+import BottomNav from "@/components/BottomNav";
+export default function CandidateShell({ children }: { children: React.ReactNode }) { return <div className="app-shell"><header className="topbar"><Link href="/candidate" className="brand">Skills<span>Proof</span></Link><nav className="desktop-nav"><Link href="/candidate">Discover</Link><Link href="/candidate/saved-jobs">Saved</Link><Link href="/candidate/applications">Applications</Link><Link href="/candidate/proof">Proof score</Link><Link href="/candidate/profile">Profile</Link></nav><div style={{display:"flex",alignItems:"center",gap:16}}><Bell size={18} color="#716d82"/><Link href="/candidate/profile" className="avatar">RS</Link></div></header>{children}<BottomNav/></div> }

@@ -1,0 +1,6 @@
+import { RecruiterCandidate } from "@/types/recruiter/candidate";
+export const recruiterCandidates: RecruiterCandidate[] = [
+ { id:"rahul", name:"Rahul Sharma", role:"Frontend Developer", location:"Bengaluru", initials:"RS", score:92, experience:"4 years", availability:"Available in 15 days", shineVerified:true, appliedJob:"Frontend Developer", status:"Shortlisted", skills:[{name:"React",evidence:"Verified",score:92},{name:"TypeScript",evidence:"Resume evidence"},{name:"Communication",evidence:"Verified",score:87}] },
+ { id:"ananya", name:"Ananya Mehta", role:"Customer Experience Lead", location:"Gurgaon", initials:"AM", score:88, experience:"5 years", availability:"Available now", shineVerified:true, appliedJob:"Senior Customer Support Executive", status:"New", skills:[{name:"Customer handling",evidence:"Verified",score:90},{name:"CRM",evidence:"Verified",score:85},{name:"Conflict resolution",evidence:"Needs proof"}] },
+ { id:"vikram", name:"Vikram Singh", role:"Data Analyst", location:"Pune", initials:"VS", score:81, experience:"3 years", availability:"Available in 30 days", skills:[{name:"SQL",evidence:"Resume evidence"},{name:"Excel",evidence:"Verified",score:84},{name:"Problem solving",evidence:"Verified",score:82}] },
+];

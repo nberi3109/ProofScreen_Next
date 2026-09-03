@@ -1,0 +1,2 @@
+import { CandidateJob } from "@/types/candidate/job";
+export const candidateJobs: CandidateJob[] = [{id:"frontend",title:"Frontend Developer",company:"TechNova",location:"Bengaluru",salary:"₹8–12 LPA",matchScore:92,skills:["React","JavaScript","TypeScript"]},{id:"support",title:"Senior Customer Support Executive",company:"Acme Services",location:"Gurgaon",salary:"₹6–8 LPA",matchScore:89,skills:["Customer Handling","CRM","Conflict Resolution"]}];
