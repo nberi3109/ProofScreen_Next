@@ -1,99 +1,69 @@
-"use client";
-
-import { ArrowLeft, ArrowRight, Check, Sparkles } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
-import { useState } from "react";
+import { notFound } from "next/navigation";
 
-import VoiceRecorder from "@/components/candidate/proof/VoiceRecorder";
+import ApiNotice, { EmptyNotice } from "@/components/api/ApiNotice";
+import SessionRunner from "@/components/dev/SessionRunner";
+import { getSession } from "@/lib/api/candidates";
 
-const questions = [
-  "A customer is angry because their issue has not been resolved for three days. What would you do?",
-  "You said you would first understand the customer's issue. What would you do if the customer still refused to cooperate?",
-  "How would you make sure this situation does not happen again?",
-];
+/**
+ * The in-browser interview — a SIMULATOR, and labelled as one.
+ *
+ * The screen this replaced walked through three hard-coded questions and
+ * printed a hard-coded 87. It looked like the product and shared nothing with
+ * it. This one drives the real orchestrator through /api/dev/sessions/*, so
+ * the questions are generated, the answers are scored by the same rubric, and
+ * the number at the end is the real one.
+ *
+ * It is not a candidate channel and must never be presented as one. WhatsApp
+ * is the channel; the opt-in message a candidate sends there is a consent
+ * step, and these dev routes skip it — which is exactly why they are gated by
+ * ENABLE_DEV_ENDPOINTS on the backend and by PROOFSCREEN_ENABLE_DEV_ACTIONS
+ * here, and why the page 404s rather than degrades when either is off.
+ */
+export default async function InterviewSimulatorPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ session_id?: string }>;
+}) {
+  if (process.env.PROOFSCREEN_ENABLE_DEV_ACTIONS !== "true") notFound();
 
-export default function Interview() {
-  const [step, setStep] = useState(0);
-  const [answered, setAnswered] = useState(false);
+  const { session_id: sessionId } = await searchParams;
 
-  const done = step >= questions.length;
-  const progress = ((step + (answered ? 0.5 : 0)) / questions.length) * 100;
+  if (!sessionId) {
+    return (
+      <main className="page detail-layout">
+        <Link className="back-link" href="/candidate/proof">
+          <ArrowLeft size={15} /> Back
+        </Link>
+        <EmptyNotice title="No session to run.">
+          <p>
+            Onboard a candidate first — the intake screen hands back a session
+            id, and this page steps through its questions.
+          </p>
+          <Link href="/candidate/start" className="primary-button">
+            Go to intake
+          </Link>
+        </EmptyNotice>
+      </main>
+    );
+  }
 
-  const goToNextQuestion = () => {
-    setStep(step + 1);
-    setAnswered(false);
-  };
+  const session = await getSession(sessionId);
 
   return (
     <main className="page detail-layout">
-      <Link className="back-link" href="/candidate">
-        <ArrowLeft size={15} /> Exit proof
+      <Link
+        className="back-link"
+        href={`/candidate/proof?session_id=${encodeURIComponent(sessionId)}`}
+      >
+        <ArrowLeft size={15} /> Exit simulator
       </Link>
 
-      {done ? (
-        <section className="score-hero">
-          <span
-            className="mini-label"
-            style={{ justifyContent: "center", color: "#21835f" }}
-          >
-            <Check size={14} /> PROOF COMPLETE
-          </span>
-          <h1>Your Proof is ready</h1>
-          <div className="big-score">87</div>
-          <p>Customer Communication · Verified</p>
-          <Link href="/candidate/proof" className="primary-button">
-            See my proof score <ArrowRight size={16} />
-          </Link>
-        </section>
+      {session.ok ? (
+        <SessionRunner sessionId={sessionId} initial={session.data} />
       ) : (
-        <>
-          <div className="hero" style={{ marginTop: 0 }}>
-            <div>
-              <span className="mini-label" style={{ color: "#5a45e8" }}>
-                <Sparkles size={14} /> AI PROOF INTERVIEW
-              </span>
-              <h1>Let&apos;s prove what you know.</h1>
-              <p>A few short questions based on your experience.</p>
-            </div>
-          </div>
-
-          <section className="detail-head">
-            <div className="eyebrow">SKILL BEING TESTED</div>
-            <h2 style={{ fontSize: 24, margin: "8px 0 20px" }}>
-              Conflict Resolution
-            </h2>
-
-            <div className="progress">
-              <i style={{ width: `${progress}%` }} />
-            </div>
-            <p
-              style={{
-                font: "12px Arial,sans-serif",
-                color: "#716d82",
-                marginTop: 10,
-              }}
-            >
-              Question {step + 1} of {questions.length}
-            </p>
-
-            <h3 style={{ fontSize: 20, lineHeight: 1.3, marginTop: 26 }}>
-              {questions[step]}
-            </h3>
-
-            <VoiceRecorder onComplete={() => setAnswered(true)} />
-
-            {answered && (
-              <button
-                className="primary-button"
-                style={{ width: "100%", marginTop: 18 }}
-                onClick={goToNextQuestion}
-              >
-                {step === 0 ? "Continue to follow-up" : "Next question"}{" "}
-                <ArrowRight size={16} />
-              </button>
-            )}
-          </section>
-        </>
+        <ApiNotice error={session.error} what={`session ${sessionId}`} />
       )}
     </main>
   );

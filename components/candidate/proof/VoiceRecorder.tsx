@@ -9,10 +9,23 @@ function formatDuration(totalSeconds: number) {
   return `${minutes}:${seconds}`;
 }
 
+/**
+ * A duration timer, not a recorder.
+ *
+ * Nothing here touches the microphone: real voice answers arrive as WhatsApp
+ * media IDs and are transcribed server-side, so there is no browser audio path
+ * to build. What this does produce is an honest elapsed time, which is what
+ * the backend's `audio_seconds` field wants — it feeds the voice-effort signal
+ * (duration and word count only; accent, fluency and pause pattern are never
+ * measured, because they are proxies for region and class).
+ *
+ * The copy says "timer" for that reason. A mic button that implies recording
+ * and captures nothing is the kind of demo detail that becomes a bug report.
+ */
 export default function VoiceRecorder({
   onComplete,
 }: {
-  onComplete: () => void;
+  onComplete: (seconds: number) => void;
 }) {
   const [recording, setRecording] = useState(false);
   const [seconds, setSeconds] = useState(0);
@@ -29,7 +42,7 @@ export default function VoiceRecorder({
       return;
     }
     setRecording(false);
-    onComplete();
+    onComplete(seconds);
   };
 
   return (
@@ -37,7 +50,7 @@ export default function VoiceRecorder({
       <button
         className={`mic-button ${recording ? "recording" : ""}`}
         onClick={toggleRecording}
-        aria-label={recording ? "Stop recording" : "Record answer"}
+        aria-label={recording ? "Stop timing this answer" : "Start timing this answer"}
       >
         {recording ? (
           <Square size={22} fill="currentColor" />
@@ -53,11 +66,11 @@ export default function VoiceRecorder({
             <span>{formatDuration(seconds)}</span>
           </div>
           <p>
-            <i /> Recording... Tap to stop
+            <i /> Timing your answer... Tap to stop
           </p>
         </>
       ) : (
-        <p>Tap to record your answer</p>
+        <p>Tap to time your answer, then type it below</p>
       )}
     </div>
   );

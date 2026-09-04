@@ -8,6 +8,7 @@ const navLinks = [
   { label: "Discover", href: "/candidate" },
   { label: "Saved", href: "/candidate/saved-jobs" },
   { label: "Applications", href: "/candidate/applications" },
+  { label: "Get verified", href: "/candidate/start" },
   { label: "Proof score", href: "/candidate/proof" },
   { label: "Profile", href: "/candidate/profile" },
 ] as const;
