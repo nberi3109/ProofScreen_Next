@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 
+import SampleBanner from "@/components/api/SampleBanner";
 import RecruiterShell from "@/components/recruiter/layout/RecruiterShell";
 import { getHealth } from "@/lib/api/client";
 
@@ -21,19 +22,24 @@ export default async function RecruiterLayout({
   const health = await getHealth();
 
   return (
-    <RecruiterShell
-      mode={
-        health.ok
-          ? {
-              llm: health.data.llm_mode,
-              whatsapp: health.data.whatsapp,
-              model: health.data.model,
-            }
-          : null
-      }
-      devEnabled={process.env.PROOFSCREEN_ENABLE_DEV_ACTIONS === "true"}
-    >
-      {children}
-    </RecruiterShell>
+    <>
+      {/* `sample` is set only when a read actually fell back to a fixture, so
+          this vanishes by itself once the API answers. */}
+      {health.ok && health.sample && <SampleBanner />}
+        <RecruiterShell
+        mode={
+          health.ok
+            ? {
+                llm: health.data.llm_mode,
+                whatsapp: health.data.whatsapp,
+                model: health.data.model,
+              }
+            : null
+        }
+        devEnabled={process.env.PROOFSCREEN_ENABLE_DEV_ACTIONS === "true"}
+      >
+        {children}
+      </RecruiterShell>
+    </>
   );
 }

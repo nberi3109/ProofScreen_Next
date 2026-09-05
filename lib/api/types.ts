@@ -447,3 +447,41 @@ export type HealthOut = {
   max_questions: number;
   job_families: number;
 };
+
+// ---------------------------------------------------------------------------
+// dev diagnostics — GET /api/dev/detect, /llm, /fixture
+//
+// These three return plain dicts rather than pydantic models, deliberately:
+// `api/schemas.py` is frozen and the dev surface was added without touching
+// it. So the types below describe a shape the backend documents in prose, not
+// one it validates — treat every field as possibly absent and never index into
+// them blind.
+// ---------------------------------------------------------------------------
+
+/** GET /api/dev/detect?text= — why a resume routed to the job family it did.
+ *
+ *  `confidence` is a MARGIN, not a probability: (top1 - top2) / top1. It says
+ *  whether the call was close, not whether it was right, and the backend sends
+ *  `confidence_is` spelling that out so a UI cannot quietly relabel it. */
+export type RoutingExplanation = {
+  family: string;
+  family_label: string;
+  confidence: number;
+  confidence_is: string;
+  /** The close second — present only when a family actually won. */
+  runner_up: string | null;
+  /** The family that LED and was rejected for missing the term floor. Present
+   *  only on a GENERAL route. Two different zeros reach this endpoint and they
+   *  mean opposite things; these two fields are how they stay distinguishable. */
+  rejected_leader: string | null;
+  matched_terms: string[];
+  per_family_scores: Record<string, number>;
+  min_terms_required: number;
+  chars_considered: number;
+};
+
+/** GET /api/dev/llm — mode, model and cache counters. Check after a rehearsal. */
+export type LlmDiagnostics = {
+  mode: string;
+  model: string | null;
+} & Record<string, unknown>;

@@ -1,77 +1,48 @@
-"use client";
-
-import { Plus, Search, SlidersHorizontal } from "lucide-react";
+import { Plus } from "lucide-react";
 import Link from "next/link";
-import { useState } from "react";
 
-import RecruiterJobTable from "@/components/recruiter/jobs/RecruiterJobTable";
-import { recruiterJobs } from "@/data/recruiter/jobs";
+import ApiNotice from "@/components/api/ApiNotice";
+import OpeningsWorkspace from "@/components/recruiter/jobs/OpeningsWorkspace";
+import { buildOpenings } from "@/lib/api/openings";
+import { getRankedCandidates, getRoles } from "@/lib/api/recruiter";
 
-const statusFilters = ["All jobs", "Published", "Draft", "Closed"];
-
-export default function RecruiterJobs() {
-  const [query, setQuery] = useState("");
-  const [status, setStatus] = useState(statusFilters[0]);
-
-  const search = query.toLowerCase();
-  const visibleJobs = recruiterJobs.filter((job) => {
-    const searchable =
-      `${job.title} ${job.department} ${job.location}`.toLowerCase();
-    const matchesSearch = searchable.includes(search);
-    const matchesStatus = status === "All jobs" || job.status === status;
-
-    return matchesSearch && matchesStatus;
-  });
+/**
+ * Openings, backed by `GET /api/recruiter/roles`.
+ *
+ * Two calls, in parallel, for the whole table: the lenses, and every scored
+ * candidate once. Applicant and qualified counts are then counted per lens
+ * from that single list rather than fetched per row — a jobs page that issued
+ * one request per opening would be slow for no gain, since the ranking of all
+ * candidates is identical regardless of which lens you ask for.
+ */
+export default async function RecruiterJobs() {
+  const [roles, ranked] = await Promise.all([
+    getRoles(),
+    getRankedCandidates(null),
+  ]);
 
   return (
     <main className="recruiter-page">
       <div className="recruiter-heading">
         <div>
-          <span className="eyebrow">WORKSPACE / JOBS</span>
-          <h1>Your jobs</h1>
+          <span className="eyebrow">WORKSPACE / OPENINGS</span>
+          <h1>Your openings</h1>
           <p>
-            Create roles, monitor applicants, and find proof-qualified talent.
+            Each opening is a lens: what it wants proved, and who has proved it.
           </p>
         </div>
         <Link href="/recruiter/jobs/new" className="primary-button">
-          <Plus size={16} /> Create a job
+          <Plus size={16} /> Create an opening
         </Link>
       </div>
 
-      <div className="jobs-toolbar">
-        <label className="recruiter-search jobs-search">
-          <Search size={16} />
-          <input
-            placeholder="Search by title, team, or location"
-            value={query}
-            onChange={(event) => setQuery(event.target.value)}
-          />
-        </label>
-
-        <div className="jobs-filters">
-          {statusFilters.map((item) => (
-            <button
-              className={status === item ? "selected" : ""}
-              key={item}
-              onClick={() => setStatus(item)}
-            >
-              {item}
-            </button>
-          ))}
-          <button aria-label="More filters">
-            <SlidersHorizontal size={16} />
-          </button>
-        </div>
-      </div>
-
-      <div className="jobs-summary">
-        <span>
-          <b>{visibleJobs.length}</b> roles shown
-        </span>
-        <span>Last updated just now</span>
-      </div>
-
-      <RecruiterJobTable jobs={visibleJobs} />
+      {!roles.ok ? (
+        <ApiNotice error={roles.error} what="your openings" />
+      ) : !ranked.ok ? (
+        <ApiNotice error={ranked.error} what="the candidate counts" />
+      ) : (
+        <OpeningsWorkspace openings={buildOpenings(roles.data, ranked.data.candidates)} />
+      )}
     </main>
   );
 }

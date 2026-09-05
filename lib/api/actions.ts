@@ -30,6 +30,7 @@
 
 import { revalidatePath } from "next/cache";
 
+import { rememberSessionId } from "./viewer";
 import {
   ApiError,
   ApiNotConfiguredError,
@@ -189,6 +190,7 @@ export async function createCandidateFromResume(
 
   try {
     const data = await apiPostForm<CandidateCreateOut>("/api/candidates", upload);
+    await rememberSessionId(data.session_id);
     revalidatePath("/recruiter/candidates");
     revalidatePath("/recruiter");
     return { ok: true, data };
@@ -239,6 +241,7 @@ export async function createCandidateFromText(
       },
       SLOW_CALL_TIMEOUT_MS,
     );
+    await rememberSessionId(data.session_id);
     revalidatePath("/recruiter/candidates");
     revalidatePath("/recruiter");
     return { ok: true, data };
@@ -340,8 +343,10 @@ export async function createRoleProfile(
       claim_weights: claimWeights,
       dimension_weights: dimensionWeights,
     });
-    revalidatePath("/recruiter/roles");
+    revalidatePath("/recruiter/jobs");
     revalidatePath("/recruiter/candidates");
+    revalidatePath("/recruiter/saved-searches");
+    revalidatePath("/recruiter");
     return { ok: true, data };
   } catch (error) {
     return fail(describe(error));
@@ -439,6 +444,38 @@ export async function simulateCandidate(
     );
     revalidatePath("/recruiter/candidates");
     revalidatePath("/recruiter");
+    return { ok: true, data };
+  } catch (error) {
+    return fail(describe(error));
+  }
+}
+
+/**
+ * POST /api/dev/reset — drop and recreate every table.
+ *
+ * "Before a rehearsal, not during one," as the backend puts it. This is the
+ * only irreversible thing the frontend can do, so it carries three locks: the
+ * dev switch, the backend's own ENABLE_DEV_ENDPOINTS, and a typed
+ * confirmation checked here rather than in the browser — a misfired fetch
+ * cannot satisfy a literal string it does not know to send.
+ */
+export async function resetDatabase(
+  _previous: ActionResult<{ status: string }> | null,
+  form: FormData,
+): Promise<ActionResult<{ status: string }>> {
+  const denied = requireDevAccess();
+  if (denied) return fail(denied);
+
+  if (text(form, "confirm") !== "RESET") {
+    return fail("Type RESET to confirm. Every candidate and score is deleted.", "confirm");
+  }
+
+  try {
+    const data = await apiPost<{ status: string }>("/api/dev/reset");
+    revalidatePath("/recruiter");
+    revalidatePath("/recruiter/candidates");
+    revalidatePath("/recruiter/jobs");
+    revalidatePath("/recruiter/validation");
     return { ok: true, data };
   } catch (error) {
     return fail(describe(error));

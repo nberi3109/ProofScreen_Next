@@ -5,7 +5,7 @@ import { useActionState } from "react";
 
 import type { ActionResult } from "@/lib/api/actions";
 import { createRoleProfile } from "@/lib/api/actions";
-import { DIMENSION_LABEL, DIMENSION_MEANING } from "@/lib/api/format";
+import { DIMENSION_LABEL, DIMENSION_MEANING, weightShares } from "@/lib/api/format";
 import { DIMENSIONS, type RoleOut, type TaxonomyFamily } from "@/lib/api/types";
 
 /**
@@ -36,6 +36,17 @@ export default function RoleProfileForm({
   >(createRoleProfile, null);
 
   const claimTypes = Object.entries(taxonomy.claim_types);
+
+  // The taxonomy sends dimension weights as fractions summing to 1.0, so
+  // rounding them straight into a placeholder printed "0" for every dimension
+  // — an editor whose defaults all read zero invites a recruiter to type
+  // something arbitrary over weights that were fine.
+  const dimensionDefaults = new Map(
+    weightShares(taxonomy.dimension_weights, DIMENSIONS).map((entry) => [
+      entry.key,
+      Math.round(entry.share),
+    ]),
+  );
 
   return (
     <form action={submit} className="role-form">
@@ -108,9 +119,7 @@ export default function RoleProfileForm({
                 min={0}
                 max={100}
                 step={1}
-                placeholder={String(
-                  Math.round(taxonomy.dimension_weights[dimension] ?? 0),
-                )}
+                placeholder={String(dimensionDefaults.get(dimension) ?? 0)}
                 inputMode="numeric"
               />
             </label>
@@ -120,7 +129,7 @@ export default function RoleProfileForm({
 
       <div className="role-form-foot">
         <button className="primary-button" type="submit" disabled={pending}>
-          {pending ? "Creating…" : "Create role lens"}
+          {pending ? "Creating…" : "Create opening"}
         </button>
         <small>
           Weights are rescaled to sum to 100 by the backend, so 40/30/20/20 is
@@ -132,7 +141,8 @@ export default function RoleProfileForm({
       {state?.ok && (
         <p className="form-success">
           <CheckCircle2 size={14} /> Created &ldquo;{state.data.title}&rdquo;. Every
-          candidate can now be re-ranked under it — no re-interviewing.
+          candidate is now ranked under it — no re-interviewing.{" "}
+          <a href={`/recruiter/jobs/${state.data.id}`}>Open it</a>
         </p>
       )}
 

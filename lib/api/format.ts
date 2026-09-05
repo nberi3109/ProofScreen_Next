@@ -168,3 +168,93 @@ export function familyLabel(key: string, label?: string | null): string {
     .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
     .join(" ");
 }
+
+// ---------------------------------------------------------------------------
+// evidence state — the candidate-facing reading of a claim
+//
+// Moved here from the old mock `lib/data.ts`, where the three states were
+// hand-assigned per skill. They are now DERIVED FROM FACTS the API reports,
+// and the derivation is categorical rather than numeric:
+//
+//   verified  the claim was probed and scored — answers exist behind it
+//   resume    the claim was extracted but never probed, so it is still just
+//             an assertion on a CV
+//   needs     the claim was probed and produced no score at all
+//
+// Note what this is not: a threshold on a score. Turning 62 into "verified"
+// and 61 into "needs proof" would be the frontend inventing a judgement the
+// backend deliberately never makes.
+// ---------------------------------------------------------------------------
+
+export type EvidenceState = "verified" | "resume" | "needs";
+
+export const evidenceLabel: Record<EvidenceState, string> = {
+  verified: "Verified",
+  resume: "Resume evidence",
+  needs: "Needs proof",
+};
+
+export function claimEvidenceState(claim: {
+  qa: unknown[];
+  claim_score: number | null;
+}): EvidenceState {
+  if (claim.qa.length === 0) return "resume";
+  return claim.claim_score === null ? "needs" : "verified";
+}
+
+// ---------------------------------------------------------------------------
+// weight display — and the scale trap it exists to defuse
+//
+// Dimension weights reach this app on TWO DIFFERENT SCALES depending on which
+// endpoint sent them, and nothing in either payload says which:
+//
+//   GET /recruiter/roles        -> claim_weights sum to 100
+//                                  dimension_weights sum to 100 when the lens
+//                                  overrides them, and are `{}` when it does not
+//   GET /recruiter/taxonomy     -> default_claim_weights sum to 100
+//                                  dimension_weights sum to 1.0  (0.19, 0.238…)
+//
+// Rendering the second lot with the first lot's formatter is how a screen ends
+// up telling a recruiter that this opening weights Specificity at "0.2" — or,
+// after rounding, at "0". Both are false, and the second is actively
+// misleading: it reads as "this role does not care about specificity".
+//
+// So weights are always displayed as a SHARE OF THEIR OWN TOTAL. That is
+// scale-independent, correct for either source, and it is the number a
+// recruiter actually wants — "a fifth of the weighting" rather than an
+// absolute that only means something relative to its siblings anyway.
+//
+// This is arithmetic on WEIGHTS, which are inputs a recruiter typed and the
+// backend rescales — not on scores. No score is normalised, averaged or
+// re-weighted anywhere in this frontend, and that rule is unchanged.
+// ---------------------------------------------------------------------------
+
+export type WeightShare<K extends string = string> = {
+  key: K;
+  /** As sent by the API, whichever scale that was. */
+  raw: number;
+  /** Percentage of the map's own total, 0-100. */
+  share: number;
+};
+
+export function weightShares<K extends string>(
+  weights: Partial<Record<K, number>>,
+  keys?: readonly K[],
+): WeightShare<K>[] {
+  const entries = (keys ?? (Object.keys(weights) as K[])).map((key) => ({
+    key,
+    raw: weights[key] ?? 0,
+  }));
+  const total = entries.reduce((sum, entry) => sum + entry.raw, 0);
+  return entries
+    .map((entry) => ({
+      ...entry,
+      share: total > 0 ? (entry.raw / total) * 100 : 0,
+    }))
+    .sort((a, b) => b.share - a.share);
+}
+
+/** One decimal below 10, none above — so 4.8 and 40 both read cleanly. */
+export function formatShare(share: number): string {
+  return share >= 10 ? `${Math.round(share)}%` : `${share.toFixed(1)}%`;
+}

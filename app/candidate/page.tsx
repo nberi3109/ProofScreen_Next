@@ -1,77 +1,65 @@
-"use client";
+import { Compass } from "lucide-react";
+import Link from "next/link";
 
-import { Filter, Search } from "lucide-react";
-import { useState } from "react";
-
-import JobCard from "@/components/candidate/jobs/JobCard";
+import ApiNotice, { EmptyNotice } from "@/components/api/ApiNotice";
+import OpeningsBrowser from "@/components/candidate/jobs/OpeningsBrowser";
 import ProofScoreCard from "@/components/candidate/proof/ProofScoreCard";
-import { jobs } from "@/lib/data";
+import { getOpeningsForViewer, getViewer } from "@/lib/api/viewer";
 
-const filters = ["For you", "High match", "Remote", "New", "Needs proof"];
-const HIGH_MATCH_SCORE = 85;
+/**
+ * Discover — openings, and how much of each one this candidate covers.
+ *
+ * The greeting used to be "Good evening, Rahul" from mock data. It is now the
+ * candidate's own name when there is a verification to read it from, and a
+ * neutral heading when there is not: a job site that greets an anonymous
+ * visitor by somebody else's name is the first thing a demo audience notices.
+ */
+export default async function CandidateHome({
+  searchParams,
+}: {
+  searchParams: Promise<{ session_id?: string }>;
+}) {
+  const { session_id: override } = await searchParams;
+  const viewer = await getViewer(override, true);
+  const openings = await getOpeningsForViewer(viewer);
 
-export default function CandidateHome() {
-  const [query, setQuery] = useState("");
-  const [activeFilter, setActiveFilter] = useState(filters[0]);
-
-  const search = query.toLowerCase();
-  const visibleJobs = jobs.filter((job) => {
-    const searchable =
-      `${job.title} ${job.company} ${job.location} ${job.requiredSkills.join(" ")}`.toLowerCase();
-    const matchesSearch = searchable.includes(search);
-    const matchesFilter =
-      activeFilter !== "High match" || job.matchScore >= HIGH_MATCH_SCORE;
-
-    return matchesSearch && matchesFilter;
-  });
+  const name = viewer?.graph?.candidate.name ?? null;
 
   return (
     <main className="page">
       <div className="hero">
         <div>
-          <h1>Good evening, Rahul</h1>
-          <p>Jobs worth your attention.</p>
+          <h1>{name ? `Hello, ${name.split(" ")[0]}` : "Roles worth proving"}</h1>
+          <p>
+            {viewer
+              ? "Openings, and how much of each your evidence already covers."
+              : "Every opening here is decided on evidence, not on how the resume was written."}
+          </p>
         </div>
       </div>
 
-      <ProofScoreCard />
+      <ProofScoreCard viewer={viewer} />
 
       <div className="section-title">
-        <h2>Recommended for you</h2>
+        <h2>
+          <Compass size={17} /> Open roles
+        </h2>
       </div>
 
-      <div className="search-row">
-        <label className="search-box">
-          <Search size={17} />
-          <input
-            aria-label="Search jobs"
-            placeholder="Search jobs, skills or companies"
-            value={query}
-            onChange={(event) => setQuery(event.target.value)}
-          />
-        </label>
-        <button className="filter-button" aria-label="Filters">
-          <Filter size={17} />
-        </button>
-      </div>
-
-      <div className="chips">
-        {filters.map((filter) => (
-          <button
-            className={`filter-chip ${activeFilter === filter ? "active" : ""}`}
-            key={filter}
-            onClick={() => setActiveFilter(filter)}
-          >
-            {filter}
-          </button>
-        ))}
-      </div>
-
-      <div className="jobs-grid" style={{ marginTop: 18 }}>
-        {visibleJobs.map((job) => (
-          <JobCard job={job} key={job.id} />
-        ))}
-      </div>
+      {!openings.ok ? (
+        <ApiNotice error={openings.error} what="the open roles" />
+      ) : openings.data.length === 0 ? (
+        <EmptyNotice title="No openings yet.">
+          <p>
+            A recruiter has not created one. You can still{" "}
+            <Link href="/candidate/start">get verified</Link> — your evidence is
+            ranked under whichever lens they create later, with no
+            re-interviewing.
+          </p>
+        </EmptyNotice>
+      ) : (
+        <OpeningsBrowser openings={openings.data} />
+      )}
     </main>
   );
 }

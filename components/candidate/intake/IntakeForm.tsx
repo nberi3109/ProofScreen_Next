@@ -24,7 +24,14 @@ import type { CandidateCreateOut, RoleOut } from "@/lib/api/types";
  *
  * So the success state below is the code, large, with the number to send it to.
  */
-export default function IntakeForm({ roles }: { roles: RoleOut[] }) {
+export default function IntakeForm({
+  roles,
+  defaultRoleId = "",
+}: {
+  roles: RoleOut[];
+  /** Preselected when the candidate arrived from a specific opening. */
+  defaultRoleId?: string;
+}) {
   const [mode, setMode] = useState<"file" | "text">("file");
 
   const [fileState, submitFile, filePending] = useActionState<
@@ -139,8 +146,9 @@ export default function IntakeForm({ roles }: { roles: RoleOut[] }) {
 
         {roles.length > 0 && (
           <label>
-            Score against a role lens <small>optional</small>
-            <select name="role_id" defaultValue="">
+            Score against an opening{" "}
+            <small>{defaultRoleId ? "preselected from the role you opened" : "optional"}</small>
+            <select name="role_id" defaultValue={defaultRoleId}>
               <option value="">Job-family defaults</option>
               {roles.map((role) => (
                 <option value={role.id} key={role.id}>

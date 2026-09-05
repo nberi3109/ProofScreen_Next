@@ -21,9 +21,10 @@ import { getRankedCandidates, getRoles } from "@/lib/api/recruiter";
 export default async function CandidatesPage({
   searchParams,
 }: {
-  searchParams: Promise<{ role_id?: string }>;
+  searchParams: Promise<{ role_id?: string; family?: string }>;
 }) {
-  const { role_id: roleId = "" } = await searchParams;
+  // `family` is how a talent pool links straight into its own cohort.
+  const { role_id: roleId = "", family = "" } = await searchParams;
 
   // Independent calls, so they go together rather than one after the other.
   const [ranked, roles] = await Promise.all([
@@ -60,16 +61,16 @@ export default async function CandidatesPage({
               Scored for <b>{ranked.data.scored_for.title}</b> (
               {ranked.data.scored_for.job_family}). Switch the lens and the order
               changes — the evidence does not.{" "}
-              <Link href="/recruiter/roles">Manage lenses</Link>
+              <Link href="/recruiter/jobs">Manage openings</Link>
             </p>
           ) : (
             <p className="lens-explainer">
               Scored with each candidate&apos;s job-family default weights.{" "}
-              <Link href="/recruiter/roles">Create a role lens</Link> to rank the
+              <Link href="/recruiter/jobs/new">Create an opening</Link> to rank the
               same evidence for a specific opening.
             </p>
           )}
-          <RankedWorkspace ranked={ranked.data} />
+          <RankedWorkspace ranked={ranked.data} initialFamily={family} />
         </>
       ) : (
         <ApiNotice error={ranked.error} what="the candidate ranking" />

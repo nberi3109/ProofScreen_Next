@@ -4239,3 +4239,1194 @@ a {
   width: auto;
   display: inline-flex;
 }
+
+/* =========================================================================
+   API-BACKED PORTAL SCREENS
+   =========================================================================
+   Added when the remaining mock screens were wired up: openings (role
+   lenses), talent pools (job families), saved rankings, the candidate's own
+   view of an opening, and the diagnostics console. Everything here extends
+   the existing visual language rather than replacing it — same tokens, same
+   radii, same type scale.
+   ========================================================================= */
+
+/* ---------- openings table ---------- */
+
+.table-flag {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  margin-left: 8px;
+  font: 700 10px Arial, Helvetica, sans-serif;
+  color: var(--red);
+  background: var(--red-soft);
+  border-radius: 999px;
+  padding: 2px 6px;
+  vertical-align: middle;
+  cursor: help;
+}
+
+/* ---------- talent pools ---------- */
+
+.pool-figures {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin: 10px 0 4px;
+  font: 11px Arial, Helvetica, sans-serif;
+  color: var(--muted);
+}
+.pool-figures b {
+  color: var(--ink);
+}
+.pool-flag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--red);
+}
+
+/* ---------- ranked list with a preview pane ---------- */
+
+.candidate-row-link {
+  display: block;
+  min-width: 0;
+}
+.candidate-select-row .ranked-position {
+  position: absolute;
+  top: 14px;
+  left: 12px;
+}
+.candidate-select-row {
+  position: relative;
+  padding-left: 30px;
+}
+.why-strong {
+  color: var(--green);
+}
+.why-fair {
+  color: var(--amber);
+}
+.why-weak {
+  color: var(--ink-soft);
+}
+.candidate-select-row .why-ranked {
+  display: block;
+  padding: 0 16px 13px 56px;
+  margin-top: -6px;
+}
+
+.preview-scores {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin: 16px 0;
+}
+.preview-scores div {
+  background: var(--paper);
+  border-radius: 10px;
+  padding: 10px 8px;
+  text-align: center;
+}
+.preview-scores b {
+  display: block;
+  font-size: 20px;
+  line-height: 1.1;
+}
+.preview-scores small {
+  display: block;
+  margin-top: 2px;
+  font: 10px Arial, Helvetica, sans-serif;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+.preview-details em {
+  font-style: normal;
+  color: var(--red);
+}
+
+/* ---------- candidate-side openings ---------- */
+
+.opening-mark {
+  background: var(--violet);
+  color: #fff;
+}
+.match-badge.match-unknown strong {
+  color: var(--muted);
+}
+.score-ring-empty {
+  background: var(--paper) !important;
+  color: var(--muted) !important;
+}
+.score-ring-strong {
+  background: var(--green-soft) !important;
+  color: var(--green) !important;
+}
+.score-ring-fair {
+  background: var(--amber-soft) !important;
+  color: var(--amber) !important;
+}
+.score-ring-weak {
+  background: var(--red-soft) !important;
+  color: var(--red) !important;
+}
+.score-line strong em {
+  font-style: normal;
+  font-size: 0.5em;
+  color: var(--muted);
+}
+.skill-chip small {
+  opacity: 0.8;
+}
+.salary-line svg {
+  vertical-align: -2px;
+  margin-right: 4px;
+}
+
+/* ---------- diagnostics ---------- */
+
+.diagnostics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 18px;
+  margin: 18px 0;
+}
+.detect-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 14px;
+}
+.detect-form textarea {
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 12px 14px;
+  font: 13px/1.6 Arial, Helvetica, sans-serif;
+  resize: vertical;
+  background: #fff;
+  color: var(--ink);
+  width: 100%;
+}
+.detect-form .primary-button {
+  align-self: flex-start;
+  width: auto;
+}
+.detect-result {
+  margin-top: 20px;
+  border-top: 1px solid var(--line);
+  padding-top: 18px;
+}
+.detect-verdict {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  background: var(--green-soft);
+  border-radius: 12px;
+  padding: 16px 18px;
+}
+.detect-verdict h3 {
+  margin: 4px 0 0;
+  font-size: 22px;
+}
+.detect-verdict.detect-general {
+  background: var(--amber-soft);
+}
+.detect-margin {
+  text-align: right;
+  flex: 0 0 auto;
+}
+.detect-margin b {
+  display: block;
+  font-size: 26px;
+  line-height: 1;
+}
+.detect-margin small {
+  font: 10px Arial, Helvetica, sans-serif;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.detect-subhead {
+  margin: 22px 0 0;
+  font: 700 11px Arial, Helvetica, sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+}
+.term-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 12px;
+}
+.term-chip {
+  background: var(--violet-soft);
+  color: var(--violet-dark);
+  border-radius: 999px;
+  padding: 4px 10px;
+  font: 11px ui-monospace, "SF Mono", Menlo, monospace;
+}
+
+.kv-list {
+  margin: 14px 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.kv-list > div {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  border-bottom: 1px dashed var(--line);
+  padding-bottom: 7px;
+}
+.kv-list dt {
+  font: 12px Arial, Helvetica, sans-serif;
+  color: var(--muted);
+  text-transform: capitalize;
+}
+.kv-list dd {
+  margin: 0;
+  font: 700 13px ui-monospace, "SF Mono", Menlo, monospace;
+  text-align: right;
+  word-break: break-all;
+}
+
+/* ---------- the one destructive control ---------- */
+
+.danger-panel {
+  border-color: #f2cdd6 !important;
+}
+.danger-panel h2 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #7c2135;
+}
+.reset-form {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 12px;
+  margin-top: 14px;
+}
+.reset-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  font: 700 12px Arial, Helvetica, sans-serif;
+  color: var(--ink-soft);
+}
+.reset-form input {
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  padding: 9px 11px;
+  font: 700 13px ui-monospace, "SF Mono", Menlo, monospace;
+  letter-spacing: 0.1em;
+  background: #fff;
+  color: var(--ink);
+  width: 180px;
+}
+.danger-button {
+  border: 0;
+  border-radius: 10px;
+  background: var(--red);
+  color: #fff;
+  padding: 11px 18px;
+  font: 700 13px Arial, Helvetica, sans-serif;
+  cursor: pointer;
+}
+.danger-button:hover {
+  background: #9d2740;
+}
+.danger-button:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+/* ---------- applicants list gets a rank column ---------- */
+
+.applicant-row .ranked-position {
+  flex: 0 0 auto;
+}
+.applicants-toolbar .text-button {
+  font: 12px Arial, Helvetica, sans-serif;
+  color: var(--violet);
+  text-decoration: underline;
+}
+
+/* =========================================================================
+   RESPONSIVE SYSTEM
+   =========================================================================
+   Added after a measured audit: 162 of 170 route/width combinations had a
+   layout defect. This block is the fix, and it is deliberately last in the
+   file so it wins on source order rather than by sprinkling !important.
+
+   The three root causes, in the order they did damage:
+
+   1. FLEXBOX'S DEFAULT `min-width: auto`. A flex or grid child is not allowed
+      to shrink below its content's intrinsic minimum unless told to. One long
+      candidate name or an un-collapsed toolbar therefore pushes its whole
+      container wider than the screen — and because `.recruiter-shell` is a
+      flex row, that widened the entire shell and squeezed every recruiter page
+      into the left half of a 640px viewport. This is why the dashboard looked
+      "inconsistent across screen sizes": it was not adapting at all, it was
+      overflowing and taking the page with it.
+
+   2. TWO UNCOORDINATED BREAKPOINT SETS. The candidate app adapted at 700px and
+      nowhere else; the recruiter app at 560/800/900/1000/1400. Between 561 and
+      800 the recruiter topbar had no rule at all, which is exactly where it
+      broke worst (+258px at 640).
+
+   3. `overflow: hidden` USED AS LAYOUT. Chip rows clipped their own content
+      silently — up to 216px of it on a 1440px desktop, because real claim-type
+      labels ("CSAT Improvement") are longer than the mock ones ("React") the
+      rule was written against. Content that cannot be reached is worse than
+      content that wraps.
+
+   One breakpoint ladder from here on, used by both apps:
+      420  compact phone      560  phone         720  large phone / small tablet
+      900  tablet             1120 small laptop
+   ========================================================================= */
+
+:root {
+  /* Fluid page gutter — 16px on a 320 phone, 28px from ~620 up. Replaces the
+     fixed 14/28/45px paddings that made small screens feel cramped and large
+     ones feel unanchored. */
+  --gutter: clamp(16px, 4.5vw, 28px);
+  --gutter-lg: clamp(20px, 4.5vw, 45px);
+
+  /* The fixed bottom nav, as a variable, so nothing has to hardcode 68px and
+     then disagree with it. `--safe-b` is the home-indicator inset on iOS and
+     gesture-bar Android; without it the nav sits under the system UI. */
+  --nav-h: 64px;
+  --safe-b: env(safe-area-inset-bottom, 0px);
+  --nav-space: calc(var(--nav-h) + var(--safe-b));
+
+  /* Type floor. The audit found 9px text in eleven routes — small enough that
+     it reads as a rendering fault rather than a design choice. 10px is
+     reserved for uppercase tracked micro-labels, where the tracking carries
+     the legibility; anything that is a sentence starts at 11.5px. */
+  --t-micro: 10px;
+  --t-small: 11.5px;
+}
+
+/* A last-resort backstop, not a fix. Every cause below is addressed directly;
+   this only catches something genuinely unbreakable — an unspaced 40-character
+   token in user data — from turning the page into a sideways scroller. `clip`
+   rather than `hidden` because `hidden` would silently create a scroll
+   container and break `position: sticky` inside it. The audit is what keeps
+   this honest: it reports element overflow, not just page overflow, so a real
+   regression still shows up. */
+html {
+  overflow-x: clip;
+}
+
+/* ---------------------------------------------------------------------------
+   1. LET THINGS SHRINK
+   Every flex/grid child below holds text and was previously refusing to go
+   below its longest word. This is the single highest-value block in the file.
+   --------------------------------------------------------------------------- */
+
+.recruiter-shell > .recruiter-content,
+.recruiter-content {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.job-card,
+.job-card-top,
+.job-heading,
+.job-meta,
+.proof-card-copy,
+.candidate-main,
+.evidence-identity,
+.claim-head > div:first-child,
+.recruiter-heading > div,
+.detail-title-row > div,
+.results-head > div,
+.filter-title,
+.role-lens,
+.saved-search-row > div,
+.pool-card,
+.mini-ranked > a > span,
+.api-notice > div,
+.mode-banner > div,
+.method-note > div,
+.evidence-card > div,
+.outcome-history li,
+.qa-list li,
+.detect-verdict > div:first-child {
+  min-width: 0;
+}
+
+/* Grid tracks: `1fr` is `minmax(auto, 1fr)`, so its floor is the content's
+   intrinsic width. `minmax(0, 1fr)` is what actually means "an equal share".
+   The base rules got this right and the mobile overrides undid it. */
+.jobs-grid,
+.skill-grid,
+.evidence-list,
+.pool-grid,
+.recruiter-stat-grid,
+.score-strip,
+.diagnostics-grid,
+.weight-grid,
+.validation-teaser {
+  grid-auto-columns: minmax(0, 1fr);
+}
+.jobs-grid > *,
+.skill-grid > *,
+.evidence-list > *,
+.pool-grid > *,
+.recruiter-stat-grid > *,
+.score-strip > *,
+.consistency-figures > *,
+.preview-scores > * {
+  min-width: 0;
+}
+
+/* Long unbroken strings in user data — an email, a system name, a pasted id. */
+.job-heading h3,
+.claim-head h3,
+.qa-question,
+.qa-answer,
+.why-ranked,
+.optin-instructions,
+.evidence-identity h1,
+.candidate-main b,
+.candidate-main small,
+.role-list b,
+.saved-search-row h2 {
+  overflow-wrap: anywhere;
+}
+
+/* ---------------------------------------------------------------------------
+   2. SCROLL ROWS INSTEAD OF CLIPPED ROWS
+   `overflow: hidden` on a row of chips means the last chips are unreachable.
+   Card chip rows wrap (they are short and order does not matter). The filter
+   row scrolls, because wrapping it would shove the results down the page —
+   but it scrolls without a fat native scrollbar and with an edge fade, so it
+   reads as scrollable rather than as cut off mid-word.
+   --------------------------------------------------------------------------- */
+
+.skill-row {
+  flex-wrap: wrap;
+  overflow: visible;
+  row-gap: 6px;
+}
+
+.chips,
+.jobs-filters,
+.family-switch > div,
+.preview-tabs,
+.recruiter-main-nav,
+.term-row {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.chips::-webkit-scrollbar,
+.jobs-filters::-webkit-scrollbar,
+.family-switch > div::-webkit-scrollbar,
+.preview-tabs::-webkit-scrollbar,
+.recruiter-main-nav::-webkit-scrollbar {
+  display: none;
+}
+
+.chips,
+.jobs-filters {
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-snap-type: x proximity;
+  /* The fade is the affordance: it says "there is more" without a scrollbar. */
+  -webkit-mask-image: linear-gradient(90deg, #000 0, #000 calc(100% - 26px), transparent 100%);
+  mask-image: linear-gradient(90deg, #000 0, #000 calc(100% - 26px), transparent 100%);
+  padding-right: 4px;
+}
+.chips > *,
+.jobs-filters > * {
+  scroll-snap-align: start;
+  flex: none;
+}
+/* No fade once everything fits — a permanent one just looks like a gradient. */
+@media (min-width: 721px) {
+  .jobs-filters {
+    -webkit-mask-image: none;
+    mask-image: none;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   3. THE BOTTOM NAV, AND CLEARING IT
+   --------------------------------------------------------------------------- */
+
+.bottom-nav {
+  height: var(--nav-space);
+  padding: 7px 6px calc(7px + var(--safe-b));
+  gap: 2px;
+}
+.nav-item {
+  min-width: 0;
+  flex: 1 1 0;
+  text-align: center;
+}
+.nav-item span {
+  font-size: var(--t-micro);
+  letter-spacing: 0.01em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
+}
+.app-shell {
+  padding-bottom: calc(var(--nav-space) + 12px);
+}
+@media (min-width: 721px) {
+  /* The nav is a mobile control; on a wide screen the header nav already
+     covers it, so the reserved space goes back to the page. */
+  .app-shell {
+    padding-bottom: 40px;
+  }
+}
+.sticky-actions {
+  padding-bottom: 0;
+}
+
+/* ---------------------------------------------------------------------------
+   4. TYPOGRAPHY — a readable floor, and tracking that scales with size
+   --------------------------------------------------------------------------- */
+
+.hero h1,
+.evidence-identity h1 {
+  /* Was a fixed -2.2px, which is fine at 48px and far too tight at 31px. */
+  letter-spacing: -0.04em;
+  overflow-wrap: anywhere;
+}
+
+.recruiter-user small,
+.candidate-score small,
+.recruiter-subnav a,
+.shine-badge,
+.filter-title button,
+.candidate-filters label,
+.range-fields span,
+.results-toolbar .jobs-filters button,
+.results-head div span,
+.results-head button,
+.candidate-select-row .candidate-skills span,
+.results-footer,
+.preview-person p,
+.preview-actions > *,
+.preview-tabs > *,
+.experience-item b,
+.full-profile-button,
+.role-list-head em,
+.validation-table em.beats {
+  font-size: var(--t-small);
+}
+.candidate-filters select {
+  font-size: var(--t-small);
+}
+
+/* Icons placed inside a heading were sitting on their own line. */
+.section-title h2,
+.recruiter-panel h2,
+.outcome-history h3,
+.consistency-panel h2,
+.danger-panel h2,
+.detect-verdict h3 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.section-title h2 > svg,
+.recruiter-panel h2 > svg {
+  flex: none;
+}
+
+/* ---------------------------------------------------------------------------
+   5. WIDE SCREENS — use the space rather than leaving it blank
+   --------------------------------------------------------------------------- */
+
+@media (min-width: 900px) {
+  /* Two fixed columns left a third of a 1440px screen empty. Auto-fill gives
+     three cards on a laptop and two on a tablet without another breakpoint. */
+  .jobs-grid {
+    grid-template-columns: repeat(auto-fill, minmax(310px, 1fr));
+  }
+  .skill-grid {
+    grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+  }
+  .proof-card {
+    max-width: none;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   6. THE LADDER
+   --------------------------------------------------------------------------- */
+
+@media (max-width: 1120px) {
+  .recruiter-topbar {
+    padding: 0 var(--gutter);
+    gap: 14px;
+  }
+  .recruiter-main-nav {
+    gap: 18px;
+    min-width: 0;
+    overflow-x: auto;
+  }
+  .recruiter-top-actions {
+    gap: 14px;
+    min-width: 0;
+    flex: none;
+  }
+  .recruiter-page {
+    padding-left: var(--gutter-lg);
+    padding-right: var(--gutter-lg);
+  }
+}
+
+@media (max-width: 900px) {
+  /* The name and its chevron are the least useful 140px in the header, and
+     they were the widest thing in it. The avatar keeps the affordance. */
+  .recruiter-user,
+  .recruiter-top-actions > .lucide-chevron-down {
+    display: none;
+  }
+  .recruiter-heading {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 14px;
+    margin-bottom: 26px;
+  }
+  .recruiter-heading .primary-button,
+  .recruiter-heading .role-lens {
+    align-self: flex-start;
+  }
+  .evidence-hero {
+    padding: 18px;
+  }
+  .evidence-hero .role-lens {
+    width: 100%;
+  }
+}
+
+@media (max-width: 860px) {
+  /* Two rows: brand and actions, then the nav on its own scrollable line.
+     Everything stays reachable, which a squeezed single row did not. */
+  .recruiter-topbar {
+    height: auto;
+    flex-wrap: wrap;
+    row-gap: 4px;
+    padding: 10px var(--gutter) 0;
+  }
+  .recruiter-topbar .brand {
+    flex: 1 1 auto;
+  }
+  .recruiter-main-nav {
+    order: 3;
+    width: 100%;
+    gap: 6px;
+    padding: 4px 0 0;
+    border-top: 1px solid #eceef3;
+    margin-top: 6px;
+  }
+  .recruiter-main-nav a {
+    flex: none;
+    padding: 10px 12px;
+    border-radius: 9px 9px 0 0;
+    white-space: nowrap;
+  }
+}
+
+@media (max-width: 720px) {
+  .page {
+    padding: 12px var(--gutter) 28px;
+  }
+  .recruiter-page {
+    padding: 22px var(--gutter) 48px;
+  }
+  .jobs-grid,
+  .skill-grid,
+  .evidence-list,
+  .pool-grid,
+  .diagnostics-grid,
+  .roles-layout,
+  .evidence-columns,
+  .ranked-workspace,
+  .candidate-workspace-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .sticky-actions {
+    bottom: var(--nav-space);
+    padding: 10px var(--gutter) calc(10px + var(--safe-b));
+  }
+  .detail-layout {
+    /* Clear the fixed action bar as well as the nav. */
+    padding-bottom: calc(var(--nav-space) + 70px);
+  }
+  .score-strip {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .outcome-form {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .big-score {
+    width: 124px;
+    height: 124px;
+    border-width: 10px;
+    font-size: 36px;
+  }
+  .score-hero {
+    padding: 26px 18px;
+  }
+}
+
+@media (max-width: 560px) {
+  /* This is a scoring product; the score is the one thing a list row must
+     never drop. The previous rule hid it here. */
+  .candidate-score {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+  }
+  .candidate-skills {
+    display: none;
+  }
+  .proof-card {
+    padding: 20px var(--gutter);
+    gap: 16px;
+  }
+  .score-ring {
+    width: 76px;
+    height: 76px;
+    border-width: 5px;
+    flex: none;
+  }
+  .score-ring span {
+    font-size: 22px;
+  }
+  .consistency-figures {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .preview-scores {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .detect-verdict {
+    flex-direction: column;
+    gap: 10px;
+  }
+  .detect-margin {
+    text-align: left;
+  }
+  .reset-form {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .reset-form input {
+    width: 100%;
+  }
+  .role-form-foot .primary-button,
+  .detect-form .primary-button {
+    width: 100%;
+    justify-content: center;
+  }
+  .optin-code {
+    font-size: 26px;
+    letter-spacing: 0.12em;
+  }
+  .optin-links > * {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 420px) {
+  /* A 320px screen is 288px of content after gutters. Everything below is
+     about giving that back rather than adding more chrome. */
+  .topbar {
+    height: 56px;
+  }
+  .brand {
+    font-size: 18px;
+  }
+  .hero {
+    margin: 12px 0 16px;
+  }
+  .hero h1 {
+    font-size: 27px;
+  }
+  .section-title {
+    margin: 26px 0 12px;
+  }
+  .section-title h2 {
+    font-size: 18px;
+  }
+  .score-line strong {
+    font-size: 34px;
+  }
+  .proof-card {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .score-ring {
+    align-self: flex-end;
+    margin-top: -58px;
+  }
+  .job-card {
+    padding: 14px;
+  }
+  .company-mark {
+    width: 34px;
+    height: 34px;
+    border-radius: 10px;
+    font-size: 16px;
+  }
+  .match-badge strong {
+    font-size: 17px;
+  }
+  .nav-item span {
+    font-size: 9.5px;
+  }
+  .recruiter-stat {
+    padding: 14px;
+  }
+  .score-strip {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .validation-table {
+    min-width: 560px;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   7. WIDE TABLES ON NARROW SCREENS
+   A 6-column, 800px-minimum table inside a 360px viewport scrolls sideways —
+   which works and is miserable. Below 720px the same markup becomes stacked
+   rows, using the `data-label` on each cell as its heading. One set of JSX,
+   two layouts, and nothing hidden.
+
+   The validation table keeps its horizontal scroll on purpose: it is a matrix
+   whose whole point is comparing the competence column against the resume
+   column side by side, and stacking it would destroy the comparison.
+   --------------------------------------------------------------------------- */
+
+@media (max-width: 720px) {
+  .recruiter-table-wrap {
+    overflow: visible;
+    background: transparent;
+    border: 0;
+    box-shadow: none;
+  }
+  .recruiter-table {
+    min-width: 0;
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0 10px;
+  }
+  .recruiter-table thead {
+    /* Accessible to a screen reader, absent from the visual layout. */
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+  .recruiter-table tr {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 2px 12px;
+    background: #fff;
+    border: 1px solid #e8eaee;
+    border-radius: 12px;
+    padding: 14px;
+    box-shadow: 0 8px 26px rgba(38, 42, 58, 0.035);
+  }
+  .recruiter-table td {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    border: 0;
+    padding: 3px 0;
+    min-width: 0;
+  }
+  .recruiter-table td[data-label]:not([data-label="Opening"])::before {
+    content: attr(data-label);
+    flex: none;
+    font: 700 var(--t-micro) Arial, Helvetica, sans-serif;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: #8b90a0;
+  }
+  /* The opening's own name spans the card and carries no label — it is the
+     heading, not a field. */
+  .recruiter-table td[data-label="Opening"] {
+    grid-column: 1 / -1;
+    padding-bottom: 9px;
+    margin-bottom: 4px;
+    border-bottom: 1px solid #f0f1f5;
+  }
+  .recruiter-table td.row-open {
+    grid-column: 1 / -1;
+    justify-content: flex-end;
+    padding-top: 6px;
+  }
+  .recruiter-table .table-job {
+    width: 100%;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   8. THE LAST FOUR, EACH MEASURED RATHER THAN GUESSED
+   --------------------------------------------------------------------------- */
+
+/* A <select> has `min-width: auto`, and for a select that means the width of
+   its LONGEST OPTION — here "Product Manager — Outcome First · Product
+   Management". No `max-width` can beat that, which is why the role lens stayed
+   349px wide inside a 288px column and dragged two pages into horizontal
+   scroll. `min-width: 0` is the only thing that lets a select shrink. */
+.role-lens {
+  flex-wrap: wrap;
+  max-width: 100%;
+}
+.role-lens select,
+.outcome-form select,
+.intake-form select,
+.role-form select,
+.candidate-filters select {
+  min-width: 0;
+  max-width: 100%;
+  /* Truncate the label rather than the layout. */
+  text-overflow: ellipsis;
+}
+@media (max-width: 720px) {
+  .role-lens {
+    width: 100%;
+  }
+  .role-lens select {
+    flex: 1 1 auto;
+  }
+}
+
+/* Type floor, enforced. These were 8px, 8.8px and 10px respectively — small
+   enough to read as a rendering fault. Micro-labels stay small on purpose
+   (uppercase plus tracking carries them) but nothing goes below 10.5px, and
+   anything that is a value a person has to read starts at 11.5px. */
+.preview-details p,
+.preview-details p b {
+  font-size: var(--t-small);
+}
+.preview-section h3 {
+  font-size: var(--t-small);
+  letter-spacing: 0.02em;
+}
+.skill-chip small {
+  font-size: var(--t-micro);
+}
+.nav-item span {
+  font-size: 10.5px;
+}
+.eyebrow,
+.mini-label,
+.badge-chip,
+.claim-type,
+.status-pill,
+.validation-table th,
+.score-cell small,
+.score-tile small,
+.recruiter-stat small {
+  font-size: 10.5px;
+}
+
+/* ---------------------------------------------------------------------------
+   9. PROPORTION
+   The audit proves nothing overflows or truncates. This last block is about
+   how it reads: even rows instead of a lonely fourth card, a hero card that
+   does not stretch into a field of empty purple, and card headers that stay
+   legible when a job-family label is four words long.
+   --------------------------------------------------------------------------- */
+
+/* A phone had NO recruiter navigation at all: a pre-existing
+   `@media (max-width: 560px) { .recruiter-main-nav { display: none } }` removed
+   it, and nothing replaced it. Candidates, Openings and Validation were
+   simply unreachable below 560px. The nav is now a scrollable row on its own
+   line, which works down to 320. */
+@media (max-width: 560px) {
+  .recruiter-main-nav {
+    display: flex;
+  }
+}
+
+/* Four stat cards in a three-wide grid leave one orphan on its own row, at
+   every width from 640 to 1440. auto-fit fills the rows it can: two-up on a
+   phone, four-up on a laptop, no orphan anywhere. */
+.recruiter-stat-grid {
+  grid-template-columns: repeat(auto-fit, minmax(216px, 1fr));
+}
+@media (max-width: 720px) {
+  /* Exactly two, not auto-fit: at 640 a 150px floor fits three columns and
+     leaves the fourth card orphaned on its own row. Two-by-two is even at
+     every width in this range. */
+  .recruiter-stat-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+  .recruiter-stat {
+    padding: 15px 14px;
+  }
+  .recruiter-stat b {
+    font-size: 27px;
+  }
+  .recruiter-stat em {
+    /* The explanatory line is the first thing to go when space is tight —
+       the label and the number carry the meaning on their own. */
+    display: none;
+  }
+}
+@media (min-width: 721px) {
+  .recruiter-stat em {
+    display: block;
+  }
+}
+
+/* Capped again on wide screens. Removing the cap made it full-bleed, and a
+   1400px-wide hero card is mostly a void between the score and the ring. */
+@media (min-width: 900px) {
+  .proof-card {
+    max-width: 760px;
+  }
+}
+
+.recruiter-page {
+  max-width: 1280px;
+}
+
+/* Card headers. A four-word family label wrapped to two lines and pressed
+   against the coverage badge. One line, ellipsised, with the badge held to a
+   fixed lane. */
+.job-heading .eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  min-width: 0;
+}
+/* Truncate the LABEL, never the row: the row also holds the "Family default"
+   pill, and clipping the row hid the pill entirely below 360px. */
+.job-heading .eyebrow-label {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.job-heading .eyebrow {
+  flex-wrap: wrap;
+  row-gap: 4px;
+}
+.job-card .match-badge {
+  flex: none;
+  min-width: 54px;
+  text-align: right;
+}
+.job-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  margin-top: 5px;
+}
+.job-meta > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+}
+@media (max-width: 480px) {
+  .job-meta {
+    font-size: 11px;
+  }
+  .job-heading h3 {
+    font-size: 15.5px;
+    line-height: 1.3;
+  }
+}
+
+/* The verified/default pill next to a family label was inheriting the
+   eyebrow's tracking and reading as part of the label. */
+.job-heading .verified-dot {
+  flex: none;
+  letter-spacing: 0;
+}
+
+/* Two label/value pairs per row is compact and readable on a 640px tablet.
+   On a 360px phone it puts "LENS Custom APPLICANTS 3 ⚠1" on one line, which
+   is dense to the point of being hard to parse — so below 560 each field gets
+   its own row. */
+@media (max-width: 560px) {
+  .recruiter-table tr {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0;
+  }
+  .recruiter-table td {
+    padding: 5px 0;
+  }
+  .recruiter-table td + td:not(.row-open) {
+    border-top: 1px solid #f4f5f8;
+  }
+}
+/* ---------------------------------------------------------------------------
+   SAMPLE DATA BANNER
+   Deliberately loud and deliberately full-bleed. A sample competence score
+   that reads as a real one is worse than a blank screen, because someone
+   repeats it in a meeting.
+   --------------------------------------------------------------------------- */
+
+.sample-banner {
+  position: relative;
+  z-index: 20;
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  background: repeating-linear-gradient(
+    135deg,
+    #7a4b0d,
+    #7a4b0d 12px,
+    #8a5710 12px,
+    #8a5710 24px
+  );
+  color: #fff;
+  padding: 9px clamp(14px, 4vw, 28px);
+}
+.sample-banner svg {
+  flex: none;
+  margin-top: 2px;
+}
+.sample-banner p {
+  margin: 0;
+  font: 11.5px/1.5 Arial, Helvetica, sans-serif;
+  max-width: 92ch;
+}
+.sample-banner b {
+  letter-spacing: 0.06em;
+}
+.sample-banner code {
+  background: #ffffff26;
+  border-radius: 4px;
+  padding: 1px 5px;
+  font-size: 11px;
+}
+
+/* Label and value are flex items in the preview pane, so the whitespace
+   between them collapses — a long value ends up touching its own label
+   ("Job familyBPO / Contact Centre Operations"). */
+.preview-details p {
+  gap: 14px;
+}
+.preview-details p b {
+  text-align: right;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}

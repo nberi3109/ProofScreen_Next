@@ -208,6 +208,74 @@ export function apiPostForm<T>(path: string, form: FormData): Promise<T> {
 
 export const SLOW_CALL_TIMEOUT_MS = SLOW_TIMEOUT_MS;
 
+// ---------------------------------------------------------------------------
+// SAMPLE DATA
+//
+// A screen with no backend is a blank screen, which is useless while the API
+// is still coming up and alarming in front of an audience. So reads can fall
+// back to the typed fixtures in ./fixtures.
+//
+// Three modes, because "always fake" and "fake only when broken" are very
+// different promises:
+//
+//   off       (default) never. A dead API renders the inline notice, which is
+//             the honest answer for a deployed build.
+//   fallback  only when the API could not be reached at all — a connection
+//             refused, a DNS failure, our own timeout, or an unset base URL.
+//             A 404 or a 500 still surfaces as an error, because those mean
+//             the API answered and said something was wrong, and hiding that
+//             behind plausible sample numbers is how a real bug ships.
+//   on        skip the network entirely. For working on the UI.
+//
+// Whenever a fixture is served the result carries `sample: true`, and the
+// layouts turn that into a banner. That matters more here than in most apps:
+// this product's whole claim is that every number came from counted, quoted
+// evidence, so a sample score that cannot be told apart from a real one is
+// not a convenience, it is a liability.
+// ---------------------------------------------------------------------------
+
+export type FixtureMode = "off" | "fallback" | "on";
+
+export function fixtureMode(): FixtureMode {
+  const raw = (process.env.PROOFSCREEN_FIXTURES ?? "off").trim().toLowerCase();
+  return raw === "on" || raw === "fallback" ? raw : "off";
+}
+
+/** Maps a request to its fixture. Returns undefined when nothing covers the
+ *  path, in which case the caller reports the real error rather than
+ *  pretending the endpoint succeeded with an empty body. */
+async function fixtureFor(
+  path: string,
+  query?: RequestOptions["query"],
+): Promise<unknown | undefined> {
+  const f = await import("./fixtures");
+
+  if (path === "/api/health") return f.FIXTURE_HEALTH;
+  if (path === "/api/recruiter/candidates") {
+    return f.fixtureRanked(query?.role_id ? String(query.role_id) : null);
+  }
+  const outcomes = path.match(/^\/api\/recruiter\/candidates\/([^/]+)\/outcomes$/);
+  if (outcomes) return f.FIXTURE_OUTCOMES.map((o) => ({ ...o, candidate_id: outcomes[1] }));
+  const graph = path.match(/^\/api\/recruiter\/candidates\/([^/]+)$/);
+  if (graph) {
+    return f.fixtureGraph(graph[1], query?.role_id ? String(query.role_id) : null);
+  }
+  if (path === "/api/recruiter/roles") return f.FIXTURE_ROLES;
+  if (path === "/api/recruiter/validation") return f.FIXTURE_VALIDATION;
+  if (path === "/api/recruiter/taxonomy") {
+    return query?.job_family
+      ? f.fixtureTaxonomy(String(query.job_family))
+      : f.FIXTURE_TAXONOMY_ALL;
+  }
+  if (/^\/api\/sessions\//.test(path)) return f.FIXTURE_SESSION;
+  return undefined;
+}
+
+/** Only a genuine "could not reach it" earns a fixture in fallback mode. */
+function unreachable(error: ApiError | ApiNotConfiguredError): boolean {
+  return error instanceof ApiNotConfiguredError || error.isUnreachable;
+}
+
 /**
  * For pages that must render something useful when the backend is down.
  *
@@ -218,7 +286,8 @@ export const SLOW_CALL_TIMEOUT_MS = SLOW_TIMEOUT_MS;
  * one that reports an error.
  */
 export type ApiResult<T> =
-  | { ok: true; data: T }
+  /** `sample` is set when this came from ./fixtures rather than the API. */
+  | { ok: true; data: T; sample?: boolean }
   | { ok: false; error: ApiError | ApiNotConfiguredError };
 
 export async function safeGet<T>(
@@ -226,10 +295,23 @@ export async function safeGet<T>(
   query?: RequestOptions["query"],
   timeoutMs?: number,
 ): Promise<ApiResult<T>> {
+  const mode = fixtureMode();
+
+  if (mode === "on") {
+    const sample = await fixtureFor(path, query);
+    if (sample !== undefined) return { ok: true, data: sample as T, sample: true };
+    // Nothing covers this path, so fall through and try the API for real
+    // rather than returning an empty success.
+  }
+
   try {
     return { ok: true, data: await apiGet<T>(path, query, timeoutMs) };
   } catch (error) {
     if (error instanceof ApiError || error instanceof ApiNotConfiguredError) {
+      if (mode !== "off" && unreachable(error)) {
+        const sample = await fixtureFor(path, query);
+        if (sample !== undefined) return { ok: true, data: sample as T, sample: true };
+      }
       return { ok: false, error };
     }
     throw error;

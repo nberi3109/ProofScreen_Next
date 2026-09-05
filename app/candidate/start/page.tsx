@@ -13,8 +13,17 @@ import { getRoles } from "@/lib/api/recruiter";
  * where the candidate journey leaves this app for good — every question and
  * answer after this point happens on WhatsApp.
  */
-export default async function CandidateStartPage() {
-  const roles = await getRoles();
+export default async function CandidateStartPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ role_id?: string }>;
+}) {
+  // Arrives from an opening's "Get considered" button, so the resulting
+  // evidence graph is scored under that role's weights from the start.
+  const [{ role_id: roleId = "" }, roles] = await Promise.all([
+    searchParams,
+    getRoles(),
+  ]);
 
   return (
     <main className="page intake-page">
@@ -38,7 +47,7 @@ export default async function CandidateStartPage() {
         <ApiNotice error={roles.error} what="the role lenses" />
       )}
 
-      <IntakeForm roles={roles.ok ? roles.data : []} />
+      <IntakeForm roles={roles.ok ? roles.data : []} defaultRoleId={roleId} />
     </main>
   );
 }

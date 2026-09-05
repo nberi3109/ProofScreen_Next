@@ -6,6 +6,7 @@ import {
   FlaskConical,
   Layers3,
   LineChart,
+  Stethoscope,
   Users,
 } from "lucide-react";
 import Link from "next/link";
@@ -39,10 +40,13 @@ export default function RecruiterShell({
 
   const navItems = [
     { label: "Candidates", href: "/recruiter/candidates", Icon: Users },
-    { label: "Role lenses", href: "/recruiter/roles", Icon: Layers3 },
+    { label: "Openings", href: "/recruiter/jobs", Icon: Layers3 },
     { label: "Validation", href: "/recruiter/validation", Icon: LineChart },
     ...(devEnabled
-      ? [{ label: "Simulator", href: "/recruiter/simulator", Icon: FlaskConical }]
+      ? [
+          { label: "Simulator", href: "/recruiter/simulator", Icon: FlaskConical },
+          { label: "Diagnostics", href: "/recruiter/diagnostics", Icon: Stethoscope },
+        ]
       : []),
   ];
 

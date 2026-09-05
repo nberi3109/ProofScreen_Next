@@ -85,3 +85,17 @@ export function getTaxonomy(
 export function getAllTaxonomy(): Promise<ApiResult<TaxonomyAll>> {
   return safeGet<TaxonomyAll>("/api/recruiter/taxonomy");
 }
+
+/**
+ * One lens by id.
+ *
+ * There is no `GET /roles/{id}`, so this filters the list. Deliberately not
+ * worked around with a new endpoint: the list is small, uncached and already
+ * needed by the same screens, and a second route would be a second thing to
+ * keep in step with the contract.
+ */
+export async function getRole(roleId: string): Promise<ApiResult<RoleOut | null>> {
+  const roles = await getRoles();
+  if (!roles.ok) return roles;
+  return { ok: true, data: roles.data.find((role) => role.id === roleId) ?? null };
+}

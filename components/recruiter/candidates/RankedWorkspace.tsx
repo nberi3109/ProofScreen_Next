@@ -1,44 +1,48 @@
 "use client";
 
-import {
-  AlertTriangle,
-  ArrowUpRight,
-  MessageCircleOff,
-  Search,
-  ShieldCheck,
-} from "lucide-react";
+import { MessageCircleOff, Search } from "lucide-react";
 import Link from "next/link";
 import { useMemo, useState } from "react";
 
-import {
-  BADGE_LABEL,
-  SESSION_STATE_LABEL,
-  familyLabel,
-  initials,
-  scoreBand,
-} from "@/lib/api/format";
+import CandidatePreview from "@/components/recruiter/candidates/CandidatePreview";
+import CandidateRow from "@/components/recruiter/candidates/CandidateRow";
+import { BADGE_LABEL, familyLabel, scoreBand } from "@/lib/api/format";
 import type { Badge, CandidateSummary, RankedCandidates } from "@/lib/api/types";
 
 /**
- * The ranked list, filtered in the browser.
+ * The ranked list: filters, rows, and a preview pane.
  *
- * Filtering happens here rather than as query params because the backend has
- * no filter parameters — and adding client-side controls that pretend to be
- * server filters would show a "142 results" count that no query produced. The
- * count below is the length of the list the API returned, nothing else.
+ * Filtering happens in the browser because the backend has no filter
+ * parameters — and client-side controls dressed up as server filters would
+ * report a result count no query produced. The count below is the length of
+ * the list the API returned, nothing else.
  *
- * Every control here maps to a field the API actually sends. There is no
- * notice-period or salary filter, because ProofScreen stores neither, and a
- * dropdown that silently does nothing is worse than an absent one.
+ * Every control maps to a field the API actually sends. There is no
+ * notice-period, salary or availability filter, because ProofScreen stores
+ * none of those, and a dropdown that silently does nothing is worse than an
+ * absent one.
+ *
+ * Sorting is deliberately NOT offered. The order is the backend's ranking
+ * under the chosen lens; a "sort by resume score" control would quietly
+ * replace an evidence ranking with the thing the product exists to beat. To
+ * reorder, change the lens.
  */
 
 const BADGES: Badge[] = ["verified", "partial", "unverified"];
 
-export default function RankedWorkspace({ ranked }: { ranked: RankedCandidates }) {
+export default function RankedWorkspace({
+  ranked,
+  initialFamily = "",
+}: {
+  ranked: RankedCandidates;
+  /** Seeded from `?family=` so a talent pool links straight into its cohort. */
+  initialFamily?: string;
+}) {
   const [query, setQuery] = useState("");
   const [badge, setBadge] = useState<Badge | "">("");
-  const [family, setFamily] = useState("");
+  const [family, setFamily] = useState(initialFamily);
   const [flaggedOnly, setFlaggedOnly] = useState(false);
+  const [selectedId, setSelectedId] = useState(ranked.candidates[0]?.id ?? "");
 
   const families = useMemo(() => {
     const seen = new Map<string, string>();
@@ -65,6 +69,10 @@ export default function RankedWorkspace({ ranked }: { ranked: RankedCandidates }
     });
   }, [ranked.candidates, query, badge, family, flaggedOnly]);
 
+  // Fall back to the first result whenever the picked candidate is filtered out.
+  const selected =
+    visible.find((candidate) => candidate.id === selectedId) ?? visible[0] ?? null;
+
   const clear = () => {
     setQuery("");
     setBadge("");
@@ -73,9 +81,10 @@ export default function RankedWorkspace({ ranked }: { ranked: RankedCandidates }
   };
 
   const filtering = Boolean(query || badge || family || flaggedOnly);
+  const roleId = ranked.scored_for?.id ?? "";
 
   return (
-    <div className="ranked-workspace">
+    <div className="candidate-workspace-grid">
       <aside className="candidate-filters">
         <div className="filter-title">
           <b>Filter this ranking</b>
@@ -86,7 +95,7 @@ export default function RankedWorkspace({ ranked }: { ranked: RankedCandidates }
 
         <p className="filter-hint">
           Filters narrow the list the API returned. They never change the
-          ranking — only the role lens above does that.
+          ranking — only the lens above does that.
         </p>
 
         <label>
@@ -100,7 +109,10 @@ export default function RankedWorkspace({ ranked }: { ranked: RankedCandidates }
 
         <label>
           Evidence badge
-          <select value={badge} onChange={(event) => setBadge(event.target.value as Badge | "")}>
+          <select
+            value={badge}
+            onChange={(event) => setBadge(event.target.value as Badge | "")}
+          >
             <option value="">Any badge</option>
             {BADGES.map((value) => (
               <option value={value} key={value}>
@@ -163,90 +175,53 @@ export default function RankedWorkspace({ ranked }: { ranked: RankedCandidates }
               : "No candidate in this ranking matches those filters."}
           </p>
         ) : (
-          <ol className="ranked-list">
+          <ol className="candidate-list ranked-list">
             {visible.map((candidate, index) => (
-              <RankedRow
-                candidate={candidate}
-                rank={index + 1}
-                roleId={ranked.scored_for?.id ?? ""}
+              <li
+                className={`candidate-select-row ${selected?.id === candidate.id ? "selected" : ""}`}
+                onClick={() => setSelectedId(candidate.id)}
                 key={candidate.id}
-              />
+              >
+                <span className="ranked-position">{index + 1}</span>
+                <Link
+                  href={
+                    roleId
+                      ? `/recruiter/candidates/${candidate.id}?role_id=${encodeURIComponent(roleId)}`
+                      : `/recruiter/candidates/${candidate.id}`
+                  }
+                  className="candidate-row-link"
+                >
+                  <CandidateRow candidate={candidate} />
+                </Link>
+                <WhyRanked candidate={candidate} />
+              </li>
             ))}
           </ol>
         )}
       </section>
+
+      <CandidatePreview
+        candidate={selected}
+        roleId={roleId}
+        onClose={() => setSelectedId("__none__")}
+      />
     </div>
   );
 }
 
-function RankedRow({
-  candidate,
-  rank,
-  roleId,
-}: {
-  candidate: CandidateSummary;
-  rank: number;
-  roleId: string;
-}) {
-  const href = roleId
-    ? `/recruiter/candidates/${candidate.id}?role_id=${encodeURIComponent(roleId)}`
-    : `/recruiter/candidates/${candidate.id}`;
-
+/** Generated by the backend from stored rows. No model call, ever — which is
+ *  why it can be shown next to the number it explains. */
+function WhyRanked({ candidate }: { candidate: CandidateSummary }) {
+  if (!candidate.why_ranked) {
+    return (
+      <span className="why-ranked why-missing">
+        <MessageCircleOff size={11} /> No ranking rationale on record
+      </span>
+    );
+  }
   return (
-    <li className="ranked-row">
-      <Link href={href}>
-        <span className="ranked-position">{rank}</span>
-        <span className="avatar candidate-avatar">{initials(candidate.name)}</span>
-
-        <span className="candidate-main">
-          <b>
-            {candidate.name}
-            <em className={`badge-chip badge-${candidate.badge}`}>
-              {candidate.badge === "verified" && <ShieldCheck size={11} />}
-              {BADGE_LABEL[candidate.badge]}
-            </em>
-            {candidate.contradiction_count > 0 && (
-              <em className="badge-chip badge-flag">
-                <AlertTriangle size={11} />
-                {candidate.contradiction_count}{" "}
-                {candidate.contradiction_count === 1
-                  ? "contradiction"
-                  : "contradictions"}
-              </em>
-            )}
-          </b>
-          <small>
-            {candidate.role ?? "Role not stated"} ·{" "}
-            {familyLabel(candidate.job_family, candidate.job_family_label)}
-            {candidate.state ? ` · ${SESSION_STATE_LABEL[candidate.state]}` : ""}
-          </small>
-          {/* Generated from stored rows by the backend. No model call, ever. */}
-          {candidate.why_ranked ? (
-            <span className="why-ranked">{candidate.why_ranked}</span>
-          ) : (
-            <span className="why-ranked why-missing">
-              <MessageCircleOff size={11} /> No ranking rationale on record
-            </span>
-          )}
-        </span>
-
-        <span className="score-pair">
-          <span className={`score-cell score-${scoreBand(candidate.competence_score)}`}>
-            <b>{candidate.competence_score}</b>
-            <small>competence</small>
-          </span>
-          <span className="score-cell muted">
-            <b>{candidate.resume_score}</b>
-            <small>resume only</small>
-          </span>
-          <span className="score-cell muted">
-            <b>{candidate.role_coverage}%</b>
-            <small>role coverage</small>
-          </span>
-        </span>
-
-        <ArrowUpRight size={17} className="row-arrow" />
-      </Link>
-    </li>
+    <span className={`why-ranked why-${scoreBand(candidate.competence_score)}`}>
+      {candidate.why_ranked}
+    </span>
   );
 }
