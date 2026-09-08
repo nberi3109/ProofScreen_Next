@@ -1,15 +1,16 @@
 "use client";
 
-import { FileText, MessageCircle, Type, Upload } from "lucide-react";
+import { FileText, Type, Upload } from "lucide-react";
 import Link from "next/link";
 import { useActionState, useState } from "react";
 
+import OptInHandoff from "@/components/candidate/intake/OptInHandoff";
 import type { ActionResult } from "@/lib/api/actions";
 import {
   createCandidateFromResume,
   createCandidateFromText,
 } from "@/lib/api/actions";
-import { SESSION_STATE_LABEL, familyLabel } from "@/lib/api/format";
+import { familyLabel } from "@/lib/api/format";
 import type { CandidateCreateOut, RoleOut } from "@/lib/api/types";
 
 /**
@@ -27,10 +28,14 @@ import type { CandidateCreateOut, RoleOut } from "@/lib/api/types";
 export default function IntakeForm({
   roles,
   defaultRoleId = "",
+  showDiagnostics = false,
 }: {
   roles: RoleOut[];
   /** Preselected when the candidate arrived from a specific opening. */
   defaultRoleId?: string;
+  /** Reveals operator-only detail — the outreach diagnostic and a link into
+   *  the recruiter dashboard. Off for candidates, who should see neither. */
+  showDiagnostics?: boolean;
 }) {
   const [mode, setMode] = useState<"file" | "text">("file");
 
@@ -47,7 +52,7 @@ export default function IntakeForm({
   const state = mode === "file" ? fileState : textState;
   const pending = mode === "file" ? filePending : textPending;
 
-  if (state?.ok) return <OptInCard result={state.data} />;
+  if (state?.ok) return <OptInCard result={state.data} showDiagnostics={showDiagnostics} />;
 
   return (
     <>
@@ -186,24 +191,30 @@ export default function IntakeForm({
   );
 }
 
-/** The consent gate, rendered as the destination it is. */
-function OptInCard({ result }: { result: CandidateCreateOut }) {
+/**
+ * The consent gate, rendered as one tap rather than a transcription exercise.
+ *
+ * `outreach_note` is deliberately NOT shown to a candidate. It says things like
+ * "No approved template configured, so the candidate must message the business
+ * number first" — a true and useful sentence for whoever configures the Meta
+ * app, and meaningless-to-alarming for the person who just uploaded a CV. It
+ * appears only when diagnostics are on.
+ */
+function OptInCard({
+  result,
+  showDiagnostics,
+}: {
+  result: CandidateCreateOut;
+  showDiagnostics: boolean;
+}) {
   return (
     <section className="optin-card">
-      <span className="mini-label">
-        <MessageCircle size={13} /> ONE STEP LEFT
-      </span>
-      <h2>Send this code on WhatsApp</h2>
-      <p className="optin-code">{result.opt_in_code}</p>
-      <p className="optin-instructions">{result.whatsapp_instructions}</p>
+      <OptInHandoff
+        code={result.opt_in_code}
+        instructions={result.whatsapp_instructions}
+      />
 
-      <p className="panel-note">
-        Nothing is asked until that message arrives — sending it is how consent
-        to be interviewed is given. Status:{" "}
-        <b>{SESSION_STATE_LABEL[result.state]}</b>.
-      </p>
-
-      {result.outreach_note && (
+      {showDiagnostics && result.outreach_note && (
         <p className={`panel-note ${result.outreach_sent ? "" : "warn"}`}>
           {result.outreach_sent
             ? `Outreach sent: ${result.outreach_note}`
@@ -241,16 +252,18 @@ function OptInCard({ result }: { result: CandidateCreateOut }) {
       <div className="optin-links">
         <Link
           href={`/candidate/proof?session_id=${encodeURIComponent(result.session_id)}`}
-          className="primary-button"
+          className="outline-button"
         >
           Track this verification
         </Link>
-        <Link
-          href={`/recruiter/candidates/${result.candidate_id}`}
-          className="outline-button"
-        >
-          Open the recruiter view
-        </Link>
+        {showDiagnostics && (
+          <Link
+            href={`/recruiter/candidates/${result.candidate_id}`}
+            className="outline-button"
+          >
+            Open the recruiter view
+          </Link>
+        )}
       </div>
     </section>
   );

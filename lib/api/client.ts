@@ -208,6 +208,16 @@ async function request<T>(path: string, options: RequestOptions = {}): Promise<T
       process.env.PROOFSCREEN_USER_AGENT?.trim() ||
       "ProofScreen-Frontend/1.0 (+https://github.com/nberi3109/ProofScreen_Next)",
   };
+
+  // An optional shared secret, for letting this caller past an edge that
+  // challenges everything else. Pair it with a WAF rule that skips protection
+  // when the header matches. Preferred over allowlisting IPs because a
+  // serverless platform's egress addresses are not stable, so an IP rule
+  // silently stops working on some later deploy.
+  const apiKey = process.env.PROOFSCREEN_API_KEY?.trim();
+  if (apiKey) {
+    headers[process.env.PROOFSCREEN_API_KEY_HEADER?.trim() || "X-ProofScreen-Key"] = apiKey;
+  }
   let body: BodyInit | undefined;
   if (options.form) {
     // Content-Type is deliberately unset: fetch adds the multipart boundary.
@@ -345,9 +355,32 @@ async function fixtureFor(
   return undefined;
 }
 
-/** Only a genuine "could not reach it" earns a fixture in fallback mode. */
+/**
+ * Only a genuine "could not reach it" earns a fixture in fallback mode.
+ *
+ * A CDN's interstitial counts. "Just a moment… Enable JavaScript and cookies
+ * to continue" is a JavaScript challenge, which no server-side fetch can ever
+ * solve — so the request provably never reached the API, and treating it as
+ * an API refusal is simply wrong. The test is narrow on purpose: an
+ * intermediary must have identified itself in the headers AND the body must
+ * look like a challenge. A bare 403 with no proxy fingerprint is still
+ * reported as the real error it is, because that one probably came from the
+ * application and hiding it would be how a genuine auth bug ships.
+ */
+const CHALLENGE_MARKERS = [
+  "just a moment",
+  "enable javascript and cookies",
+  "checking your browser",
+  "attention required",
+  "cf-browser-verification",
+  "challenge-platform",
+];
+
 function unreachable(error: ApiError | ApiNotConfiguredError): boolean {
-  return error instanceof ApiNotConfiguredError || error.isUnreachable;
+  if (error instanceof ApiNotConfiguredError || error.isUnreachable) return true;
+  if (!error.isForbidden || !error.via) return false;
+  const haystack = error.detail.toLowerCase();
+  return CHALLENGE_MARKERS.some((marker) => haystack.includes(marker));
 }
 
 /**

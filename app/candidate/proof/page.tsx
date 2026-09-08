@@ -1,7 +1,8 @@
-import { ArrowRight, MessageCircle, ShieldCheck } from "lucide-react";
+import { ArrowRight, ShieldCheck } from "lucide-react";
 import Link from "next/link";
 
 import ApiNotice, { EmptyNotice } from "@/components/api/ApiNotice";
+import OptInHandoff from "@/components/candidate/intake/OptInHandoff";
 import { getSession } from "@/lib/api/candidates";
 import {
   BADGE_LABEL,
@@ -111,16 +112,15 @@ export default async function CandidateProofPage({
         </div>
       </div>
 
-      {data.state === "AWAITING_OPT_IN" && (
+      {data.state === "AWAITING_OPT_IN" && data.opt_in_code && (
         <section className="optin-card">
-          <span className="mini-label">
-            <MessageCircle size={13} /> ONE STEP LEFT
-          </span>
-          <h2>Send this code on WhatsApp</h2>
-          <p className="optin-code">{data.opt_in_code ?? "—"}</p>
+          {/* No auto-hop here: arriving on the tracking page usually means the
+              candidate has come BACK from WhatsApp, and bouncing them out
+              again would be a loop they cannot leave. */}
+          <OptInHandoff code={data.opt_in_code} autoOpen={false} />
           <p className="panel-note">
             Your claims are extracted and waiting. Nothing is asked until that
-            message arrives — sending it is how you agree to be interviewed.
+            message arrives.
           </p>
         </section>
       )}

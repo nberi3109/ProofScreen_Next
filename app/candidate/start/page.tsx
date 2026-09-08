@@ -47,7 +47,11 @@ export default async function CandidateStartPage({
         <ApiNotice error={roles.error} what="the role lenses" />
       )}
 
-      <IntakeForm roles={roles.ok ? roles.data : []} defaultRoleId={roleId} />
+      <IntakeForm
+        roles={roles.ok ? roles.data : []}
+        defaultRoleId={roleId}
+        showDiagnostics={process.env.PROOFSCREEN_ENABLE_DEV_ACTIONS === "true"}
+      />
     </main>
   );
 }
