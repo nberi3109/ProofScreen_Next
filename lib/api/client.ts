@@ -61,12 +61,29 @@ export class ApiError extends Error {
   /** FastAPI's `detail`, already unwrapped — including the 422 list form. */
   readonly detail: string;
 
-  constructor(status: number, path: string, detail: string) {
-    super(`${status} on ${path}: ${detail}`);
+  /**
+   * Who answered, when it was not the API.
+   *
+   * A 403 or 503 from a CDN, WAF or reverse proxy is indistinguishable from
+   * one the application produced unless you look at the response headers —
+   * and the difference decides where you go looking. `server: cloudflare`
+   * plus a `cf-ray` means the request never reached uvicorn.
+   */
+  readonly via: string | null;
+
+  constructor(status: number, path: string, detail: string, via: string | null = null) {
+    super(`${status} on ${path}: ${detail}${via ? ` [via ${via}]` : ""}`);
     this.name = "ApiError";
     this.status = status;
     this.path = path;
     this.detail = detail;
+    this.via = via;
+  }
+
+  /** 401/403 — and the interesting question is whether the API said it, or
+   *  something in front of it did. `via` is how you tell. */
+  get isForbidden(): boolean {
+    return this.status === 401 || this.status === 403;
   }
 
   get isNotFound(): boolean {
@@ -113,6 +130,40 @@ function readDetail(payload: unknown, fallback: string): string {
   return fallback;
 }
 
+/** A non-JSON error body, flattened to one readable line. HTML error pages
+ *  are mostly markup, so the tags go and the first real sentence stays. */
+function snippet(raw: string): string {
+  if (!raw) return "";
+  const text = raw
+    .replace(/<script[\s\S]*?<\/script>/gi, " ")
+    .replace(/<style[\s\S]*?<\/style>/gi, " ")
+    .replace(/<[^>]+>/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+  return text.length > 300 ? `${text.slice(0, 300)}…` : text;
+}
+
+/** Names the hop that answered, from the headers CDNs and proxies add. Blank
+ *  when nothing identifies an intermediary, which itself is informative: it
+ *  suggests the response really did come from the application. */
+function describeResponder(response: Response): string | null {
+  const bits: string[] = [];
+  for (const header of [
+    "server",
+    "via",
+    "cf-ray",
+    "cf-mitigated",
+    "x-proxy-error",
+    "x-amzn-errortype",
+    "x-vercel-error",
+    "x-envoy-upstream-service-time",
+  ]) {
+    const value = response.headers.get(header);
+    if (value) bits.push(`${header}: ${value}`);
+  }
+  return bits.length ? bits.join("; ") : null;
+}
+
 const DEFAULT_TIMEOUT_MS = 20_000;
 /** Signal extraction runs several model calls per answer, so intake and the
  *  simulator need a much longer ceiling than a dashboard read. */
@@ -140,7 +191,23 @@ async function request<T>(path: string, options: RequestOptions = {}): Promise<T
     }
   }
 
-  const headers: Record<string, string> = { Accept: "application/json" };
+  // A User-Agent, on purpose.
+  //
+  // Node's fetch sends little or no UA of its own, and an edge in front of the
+  // API may refuse that outright — Cloudflare's Browser Integrity Check 403s
+  // requests with a missing or non-standard User-Agent, which is exactly why
+  // such a call fails from a deployed server while the same request from
+  // Postman (PostmanRuntime/x.y) or a browser succeeds. Identifying the caller
+  // is also just good manners: it puts a name in the API's access log instead
+  // of a blank.
+  //
+  // Override with PROOFSCREEN_USER_AGENT if the edge wants something specific.
+  const headers: Record<string, string> = {
+    Accept: "application/json",
+    "User-Agent":
+      process.env.PROOFSCREEN_USER_AGENT?.trim() ||
+      "ProofScreen-Frontend/1.0 (+https://github.com/nberi3109/ProofScreen_Next)",
+  };
   let body: BodyInit | undefined;
   if (options.form) {
     // Content-Type is deliberately unset: fetch adds the multipart boundary.
@@ -168,18 +235,25 @@ async function request<T>(path: string, options: RequestOptions = {}): Promise<T
   }
 
   if (!response.ok) {
+    // Read the body as TEXT first, then try to parse it. The previous version
+    // called `response.json()` and threw away anything that was not JSON —
+    // which meant a proxy explaining exactly why it blocked the request
+    // ("blocked-by-allowlist", "Attention Required: Cloudflare") arrived in
+    // the UI as the word "Forbidden" and nothing else. The body of a 403 is
+    // usually the whole answer, so it is no longer discarded.
+    const raw = await response.text().catch(() => "");
     let payload: unknown = null;
     try {
-      payload = await response.json();
+      payload = raw ? JSON.parse(raw) : null;
     } catch {
-      // A non-JSON error body (a proxy's HTML 502, say) leaves payload null and
-      // falls through to the status-text fallback below.
+      payload = null;
     }
-    throw new ApiError(
-      response.status,
-      path,
-      readDetail(payload, response.statusText || "request failed"),
-    );
+
+    const detail = payload
+      ? readDetail(payload, response.statusText || "request failed")
+      : snippet(raw) || response.statusText || "request failed";
+
+    throw new ApiError(response.status, path, detail, describeResponder(response));
   }
 
   if (response.status === 204) return undefined as T;
