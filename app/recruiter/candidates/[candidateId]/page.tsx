@@ -6,6 +6,7 @@ import RoleLens from "@/components/recruiter/candidates/RoleLens";
 import ClaimEvidence from "@/components/recruiter/evidence/ClaimEvidence";
 import ConsistencyPanel from "@/components/recruiter/evidence/ConsistencyPanel";
 import DimensionBar from "@/components/recruiter/evidence/DimensionBar";
+import EvaluationsPanel from "@/components/recruiter/evidence/EvaluationsPanel";
 import OutcomePanel from "@/components/recruiter/evidence/OutcomePanel";
 import { recordOutcome } from "@/lib/api/actions";
 import {
@@ -17,7 +18,13 @@ import {
   routingLabel,
   scoreBand,
 } from "@/lib/api/format";
-import { getCandidateGraph, getOutcomes, getRoles } from "@/lib/api/recruiter";
+import {
+  getCandidateEvaluations,
+  getCandidateGraph,
+  getOutcomes,
+  getRoles,
+} from "@/lib/api/recruiter";
+import { isLegacyDimension } from "@/lib/api/types";
 
 /**
  * GET /api/recruiter/candidates/{id} — the evidence graph behind one score.
@@ -50,10 +57,11 @@ export default async function CandidateEvidencePage({
   const { candidateId } = await params;
   const { role_id: roleId = "" } = await searchParams;
 
-  const [graphResult, outcomes, roles] = await Promise.all([
+  const [graphResult, outcomes, roles, evaluations] = await Promise.all([
     getCandidateGraph(candidateId, roleId || null),
     getOutcomes(candidateId),
     getRoles(),
+    getCandidateEvaluations(candidateId),
   ]);
 
   const backHref = roleId
@@ -165,10 +173,19 @@ export default async function CandidateEvidencePage({
           <section className="recruiter-panel">
             <h2>Dimension profile</h2>
             <p className="panel-note">
-              Six dimensions, session-wide. English fluency, accent and
-              &ldquo;speaking confidence&rdquo; are deliberately not among them —
-              they are proxies for region and class, and a Team Lead from Jaipur
-              must not score below one from Bangalore for less polished English.
+              {graph.dimension_profile.length} dimensions, session-wide.
+              English fluency, accent and &ldquo;speaking confidence&rdquo; are
+              deliberately not among them — they are proxies for region and
+              class, and a Team Lead from Jaipur must not score below one from
+              Bangalore for less polished English.
+              {graph.dimension_profile.some((d) => isLegacyDimension(d.dimension)) && (
+                <>
+                  {" "}
+                  Some rows below use the superseded framework: this evaluation
+                  was scored before the dimensions changed, and is shown as it
+                  was scored rather than re-labelled.
+                </>
+              )}
             </p>
             <div className="dim-list">
               {graph.dimension_profile.map((dim) => (
@@ -213,6 +230,12 @@ export default async function CandidateEvidencePage({
             roles={roles.ok ? roles.data : []}
             activeRoleId={roleId}
           />
+
+          {evaluations.ok ? (
+            <EvaluationsPanel evaluations={evaluations.data} />
+          ) : (
+            <ApiNotice error={evaluations.error} what="the assessment history" />
+          )}
 
           {!outcomes.ok && (
             <ApiNotice error={outcomes.error} what="the decision history" />

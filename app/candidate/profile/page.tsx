@@ -2,6 +2,7 @@ import { FileText, ShieldCheck } from "lucide-react";
 import Link from "next/link";
 
 import { EmptyNotice } from "@/components/api/ApiNotice";
+import DimensionBasis from "@/components/recruiter/evidence/DimensionBasis";
 import SkillChip from "@/components/ui/SkillChip";
 import {
   BADGE_LABEL,
@@ -148,7 +149,7 @@ export default async function Profile({
                   <div className="evidence-card" key={dim.dimension}>
                     <div>
                       <h3>{DIMENSION_LABEL[dim.dimension]}</h3>
-                      <p>{dim.basis}</p>
+                      <DimensionBasis basis={dim.basis} className="" />
                     </div>
                     <strong className={`score-${scoreBand(dim.score)}`}>
                       {dim.score}

@@ -3,6 +3,7 @@ import Link from "next/link";
 
 import ApiNotice, { EmptyNotice } from "@/components/api/ApiNotice";
 import OptInHandoff from "@/components/candidate/intake/OptInHandoff";
+import DimensionBasis from "@/components/recruiter/evidence/DimensionBasis";
 import { getSession } from "@/lib/api/candidates";
 import {
   BADGE_LABEL,
@@ -178,7 +179,7 @@ export default async function CandidateProofPage({
                   <div className="progress">
                     <i style={{ width: `${dim.score}%` }} />
                   </div>
-                  <p className="dim-basis">{dim.basis}</p>
+                  <DimensionBasis basis={dim.basis} />
                 </div>
               ))}
           </div>

@@ -29,7 +29,7 @@
  */
 
 import {
-  DIMENSIONS,
+  COMPETENCE_DIMENSIONS,
   type CandidateGraph,
   type CandidateSummary,
   type Dimension,
@@ -79,11 +79,11 @@ export function buildOpening(
     topClaims: Object.entries(role.claim_weights)
       .map(([key, weight]) => ({ key, weight }))
       .sort((a, b) => b.weight - a.weight),
-    topDimensions: DIMENSIONS.map((dimension) => ({
+    topDimensions: COMPETENCE_DIMENSIONS.map((dimension) => ({
       dimension,
       weight: role.dimension_weights[dimension] ?? 0,
     })).sort((a, b) => b.weight - a.weight),
-    overridesDimensions: DIMENSIONS.some(
+    overridesDimensions: COMPETENCE_DIMENSIONS.some(
       (dimension) => (role.dimension_weights[dimension] ?? 0) > 0,
     ),
   };
@@ -187,7 +187,7 @@ export function buildCandidateOpening(
     competence: graph?.competence_score ?? null,
     matched,
     missing: [...weighted].filter((key) => !seen.has(key)).map(claimKeyLabel),
-    overridesDimensions: DIMENSIONS.some(
+    overridesDimensions: COMPETENCE_DIMENSIONS.some(
       (dimension) => (role.dimension_weights[dimension] ?? 0) > 0,
     ),
   };

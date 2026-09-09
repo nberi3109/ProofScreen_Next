@@ -10,6 +10,9 @@
 import { safeGet, type ApiResult } from "./client";
 import type {
   CandidateGraph,
+  EvaluationHistoryOut,
+  EvaluationOut,
+  EvaluationSummary,
   OutcomeOut,
   RankedCandidates,
   RoleOut,
@@ -98,4 +101,43 @@ export async function getRole(roleId: string): Promise<ApiResult<RoleOut | null>
   const roles = await getRoles();
   if (!roles.ok) return roles;
   return { ok: true, data: roles.data.find((role) => role.id === roleId) ?? null };
+}
+
+// ---------------------------------------------------------------------------
+// evaluations — the auditable record behind a score
+// ---------------------------------------------------------------------------
+
+/**
+ * A candidate's assessment history, NEWEST FIRST.
+ *
+ * Note the deliberate asymmetry with `getOutcomes`, which is oldest-first:
+ * outcomes are read as a progression by the validation report, while this is a
+ * feed a human scrolls. Do not "normalise" either one — the order is part of
+ * each endpoint's meaning.
+ */
+export function getCandidateEvaluations(
+  candidateId: string,
+): Promise<ApiResult<EvaluationSummary[]>> {
+  return safeGet<EvaluationSummary[]>(
+    `/api/recruiter/candidates/${encodeURIComponent(candidateId)}/evaluations`,
+  );
+}
+
+/** One assessment, retrievable independently of the live interview — with the
+ *  weights it was scored under and the version stamp that produced it. */
+export function getEvaluation(
+  evaluationId: string,
+): Promise<ApiResult<EvaluationOut>> {
+  return safeGet<EvaluationOut>(
+    `/api/recruiter/evaluations/${encodeURIComponent(evaluationId)}`,
+  );
+}
+
+/** What the evaluation concluded, and what a human then did about it. */
+export function getEvaluationHistory(
+  evaluationId: string,
+): Promise<ApiResult<EvaluationHistoryOut>> {
+  return safeGet<EvaluationHistoryOut>(
+    `/api/recruiter/evaluations/${encodeURIComponent(evaluationId)}/history`,
+  );
 }

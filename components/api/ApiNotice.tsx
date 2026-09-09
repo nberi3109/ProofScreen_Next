@@ -48,6 +48,23 @@ export default function ApiNotice({
     );
   }
 
+  if (error.isOriginDown) {
+    return (
+      <div className="api-notice api-notice-down">
+        <ServerCrash size={18} />
+        <div>
+          <b>The API server is not answering.</b>
+          <p>
+            Could not load {what}. The CDN in front of the API reached it and
+            got no reply ({error.status}) — so the API process is down, or is
+            not listening on the port the CDN connects to. Nothing reached the
+            application, so this is not a bad request.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   if (error.isNotFound) {
     return (
       <div className="api-notice">

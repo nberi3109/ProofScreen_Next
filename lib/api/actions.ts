@@ -44,9 +44,11 @@ import {
   type DevAnswerOut,
   type OutcomeDecision,
   type OutcomeOut,
+  type ReplayResultOut,
   type RoleOut,
   type SessionOut,
   type SimulateOut,
+  type TenantOut,
 } from "./types";
 
 // ---------------------------------------------------------------------------
@@ -476,6 +478,67 @@ export async function resetDatabase(
     revalidatePath("/recruiter/candidates");
     revalidatePath("/recruiter/jobs");
     revalidatePath("/recruiter/validation");
+    return { ok: true, data };
+  } catch (error) {
+    return fail(describe(error));
+  }
+}
+
+/**
+ * POST /api/dev/replay/{id} — recompute the deterministic tail and diff it.
+ *
+ * The strongest answer this product has to "how do we know the score is not
+ * the model's opinion?": the number is recomputed from stored signals with
+ * ZERO model calls and compared with what was finalized. A MATCH means the
+ * arithmetic is reproducible; a MISMATCH names the field that moved, and
+ * `provenance_drift` says which version input changed under it.
+ *
+ * A support tool rather than a recruiter feature — hence the dev gate — but
+ * the one worth having on screen when somebody asks the hard question.
+ */
+export async function replayEvaluation(
+  evaluationId: string,
+): Promise<ActionResult<ReplayResultOut>> {
+  const denied = requireDevAccess();
+  if (denied) return fail(denied);
+  if (!evaluationId) return fail("Missing evaluation.");
+
+  try {
+    const data = await apiPost<ReplayResultOut>(
+      `/api/dev/replay/${encodeURIComponent(evaluationId)}`,
+      {},
+      SLOW_CALL_TIMEOUT_MS,
+    );
+    return { ok: true, data };
+  } catch (error) {
+    return fail(describe(error));
+  }
+}
+
+/**
+ * POST /api/dev/tenants — provision a tenant and return its key ONCE.
+ *
+ * The key is shown in this response and never again: only its sha256 is
+ * stored, so a lost key is re-provisioned rather than recovered. Any UI that
+ * displays it has to say so, or somebody will close the tab.
+ */
+export async function provisionTenant(
+  _previous: ActionResult<TenantOut> | null,
+  form: FormData,
+): Promise<ActionResult<TenantOut>> {
+  const denied = requireDevAccess();
+  if (denied) return fail(denied);
+
+  const slug = text(form, "slug");
+  if (!/^[a-z0-9][a-z0-9-]{1,59}$/.test(slug)) {
+    return fail("Slug must be lower-case letters, digits and hyphens.", "slug");
+  }
+
+  try {
+    const data = await apiPost<TenantOut>("/api/dev/tenants", {
+      slug,
+      name: optional(form, "name"),
+    });
     return { ok: true, data };
   } catch (error) {
     return fail(describe(error));

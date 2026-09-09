@@ -1,10 +1,17 @@
-import { Compass, Cpu, FileJson, Search } from "lucide-react";
+import { Compass, Cpu, FileJson, Fingerprint, Search } from "lucide-react";
 import { notFound } from "next/navigation";
 
 import ApiNotice from "@/components/api/ApiNotice";
 import ResetPanel from "@/components/dev/ResetPanel";
-import { detectFamily, getFixture, getLlmDiagnostics } from "@/lib/api/dev";
+import TenantPanel from "@/components/dev/TenantPanel";
+import {
+  detectFamily,
+  getFixture,
+  getLlmDiagnostics,
+  getProvenanceStamp,
+} from "@/lib/api/dev";
 import { familyLabel } from "@/lib/api/format";
+import type { ProvenanceStampOut } from "@/lib/api/types";
 
 /**
  * The diagnostics console — the last four /api/dev/* routes on a screen.
@@ -34,10 +41,11 @@ export default async function DiagnosticsPage({
   const { text = "" } = await searchParams;
   const trimmed = text.trim().slice(0, 20_000);
 
-  const [llm, fixture, routing] = await Promise.all([
+  const [llm, fixture, routing, stamp] = await Promise.all([
     getLlmDiagnostics(),
     getFixture(),
     trimmed ? detectFamily(trimmed) : Promise.resolve(null),
+    getProvenanceStamp(),
   ]);
 
   return (
@@ -155,6 +163,25 @@ export default async function DiagnosticsPage({
         </section>
       </div>
 
+      <section className="recruiter-panel stamp-panel">
+        <h2>
+          <Fingerprint size={17} /> Version stamp
+        </h2>
+        <p className="panel-note">
+          What this build would stamp onto an evaluation finalized right now.
+          Compare it against a stored evaluation&rsquo;s fingerprint to see
+          whether that score is still reproducible on this deployment.
+        </p>
+
+        {!stamp.ok ? (
+          <ApiNotice error={stamp.error} what="the version stamp" />
+        ) : (
+          <StampResult stamp={stamp.data} />
+        )}
+      </section>
+
+      <TenantPanel />
+
       <ResetPanel />
     </main>
   );
@@ -235,6 +262,71 @@ function RoutingResult({
           ))}
         </div>
       )}
+    </div>
+  );
+}
+
+
+/**
+ * The live fingerprint, then the two lists that make it trustworthy: exactly
+ * what it is computed over, and exactly what it ignores.
+ *
+ * `model_returned` is printed OUTSIDE the material block on purpose. It is
+ * observed and recorded but deliberately not hashed, and a reader who does not
+ * see that distinction drawn will assume a mismatch invalidates the hash.
+ */
+function StampResult({ stamp }: { stamp: ProvenanceStampOut }) {
+  const material = Object.entries(stamp.fingerprint_material);
+  const swapped =
+    stamp.model_returned !== null &&
+    stamp.model_requested !== null &&
+    stamp.model_returned !== stamp.model_requested;
+
+  return (
+    <div className="stamp-result">
+      <div className="stamp-fingerprint">
+        <span className="eyebrow">FINGERPRINT</span>
+        <code>{stamp.evaluation_version}</code>
+        <em>
+          A hash of the inputs below — not a version number. Equal means two
+          evaluations are comparable; different means something moved, and the
+          rows say which.
+        </em>
+      </div>
+
+      {swapped && (
+        <p className="form-error">
+          The provider served <b>{stamp.model_returned}</b> for a request of{" "}
+          <b>{stamp.model_requested}</b>. This is recorded but not hashed, so it
+          does not change the fingerprint — and that is the point: a per-process
+          observation cannot honestly be a per-evaluation identity input.
+        </p>
+      )}
+
+      <h4 className="detect-subhead">Hashed — {material.length} inputs</h4>
+      <dl className="kv-list">
+        {material.map(([key, value]) => (
+          <div key={key}>
+            <dt>{key.replace(/_/g, " ")}</dt>
+            <dd>
+              {value === null || value === undefined ? (
+                "—"
+              ) : typeof value === "object" ? (
+                <code>{JSON.stringify(value)}</code>
+              ) : (
+                String(value)
+              )}
+            </dd>
+          </div>
+        ))}
+      </dl>
+
+      <h4 className="detect-subhead">Not hashed</h4>
+      <ul className="stamp-excludes">
+        {stamp.fingerprint_excludes.map((line) => (
+          <li key={line}>{line}</li>
+        ))}
+      </ul>
     </div>
   );
 }

@@ -1,6 +1,7 @@
 import { Quote } from "lucide-react";
 
 import { DIMENSION_LABEL, DIMENSION_MEANING, scoreBand } from "@/lib/api/format";
+import DimensionBasis from "./DimensionBasis";
 import type { DimensionScore } from "@/lib/api/types";
 
 /**
@@ -47,7 +48,7 @@ export default function DimensionBar({ dim }: { dim: DimensionScore }) {
       <div className="dim-track">
         <i style={{ width: `${dim.score}%` }} />
       </div>
-      {dim.basis && <p className="dim-basis">{dim.basis}</p>}
+      {dim.basis && <DimensionBasis basis={dim.basis} />}
       {dim.quotes.length > 0 && (
         <details className="dim-quotes">
           <summary>

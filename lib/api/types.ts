@@ -24,7 +24,41 @@
 // the point of use rather than a silently-rendered blank
 // ---------------------------------------------------------------------------
 
-export const DIMENSIONS = [
+/**
+ * TWO GENERATIONS OF DIMENSION, AND WHY BOTH ARE HERE.
+ *
+ * The backend's `Dimension` enum carries twelve members. Six are the original
+ * evidence dimensions; six are the Universal Competence Framework that
+ * replaced them. The taxonomy now weights ONLY the second set — every live
+ * `dimension_weights` response comes back keyed on KNOWLEDGE…ADAPTABILITY.
+ *
+ * The first set is not dead: finalized evaluations and stored evidence rows
+ * still carry those keys, and an evaluation is supposed to remain readable
+ * forever. So the frontend knows all twelve and enumerates only the active
+ * six.
+ *
+ * This is the exact drift that made every bar on the evidence graph render
+ * with a blank label: the backend moved to the new names and the label map
+ * only had the old ones, so `DIMENSION_LABEL[dim.dimension]` was `undefined`
+ * and React rendered nothing. A missing key in a lookup map is invisible —
+ * which is why the two lists below are exported separately and every map over
+ * them is exhaustive by type.
+ */
+
+/** The active framework. Enumerate THIS for anything forward-looking: weight
+ *  editors, "which dimensions does this role emphasise", new UI. */
+export const COMPETENCE_DIMENSIONS = [
+  "KNOWLEDGE",
+  "EXECUTION",
+  "PROBLEM_SOLVING",
+  "JUDGMENT",
+  "OWNERSHIP",
+  "ADAPTABILITY",
+] as const;
+
+/** Superseded, still readable. Present on evaluations finalized before the
+ *  framework changed. Never offered as a choice, always rendered if received. */
+export const LEGACY_DIMENSIONS = [
   "SPECIFICITY",
   "PROCESS",
   "METRIC_OWNERSHIP",
@@ -32,7 +66,19 @@ export const DIMENSIONS = [
   "AUTHENTICITY",
   "TOOL_FAMILIARITY",
 ] as const;
+
+/** Everything the API can send. Use for types and for rendering. */
+export const DIMENSIONS = [
+  ...COMPETENCE_DIMENSIONS,
+  ...LEGACY_DIMENSIONS,
+] as const;
+
 export type Dimension = (typeof DIMENSIONS)[number];
+export type CompetenceDimension = (typeof COMPETENCE_DIMENSIONS)[number];
+
+export function isLegacyDimension(dimension: Dimension): boolean {
+  return (LEGACY_DIMENSIONS as readonly string[]).includes(dimension);
+}
 
 export const PROBE_LEVELS = [
   "VALIDATION",
@@ -102,6 +148,35 @@ export type ExtractedFact = {
   quote: string;
 };
 
+/** A choice made, and the reason for it. Feeds JUDGMENT. */
+export type DecisionSignal = {
+  choice: string;
+  reason: string | null;
+  quote: string;
+};
+
+/** A limitation they worked inside, and what it cost. Feeds JUDGMENT. */
+export type ConstraintSignal = {
+  limitation: string;
+  effect: string | null;
+  quote: string;
+};
+
+/** Not "what did you do" but "why does it work". Feeds KNOWLEDGE. */
+export type ConceptExplanation = {
+  concept: string;
+  reasoning: string | null;
+  quote: string;
+};
+
+/** What they held versus what they handed off — the honest edge of a claim.
+ *  Feeds OWNERSHIP. */
+export type OwnershipBoundary = {
+  scope_held: string;
+  scope_handed_off: string | null;
+  quote: string;
+};
+
 export type AnswerSignals = {
   quantities: Quantity[];
   process_steps: ProcessStep[];
@@ -110,6 +185,10 @@ export type AnswerSignals = {
   metric_definitions: MetricDefinition[];
   incident_markers: IncidentMarker[];
   entities: NamedEntity[];
+  decisions: DecisionSignal[];
+  constraints: ConstraintSignal[];
+  concept_explanations: ConceptExplanation[];
+  boundaries: OwnershipBoundary[];
   facts: ExtractedFact[];
   summary: string;
 };
@@ -446,6 +525,14 @@ export type HealthOut = {
   whatsapp: string;
   max_questions: number;
   job_families: number;
+  /** Additive and optional: the active version set, so "which build produced
+   *  this?" is answerable without shelling into the container. */
+  taxonomy_version?: string | null;
+  rubric_version?: string | null;
+  scoring_version?: string | null;
+  question_policy_version?: string | null;
+  code_version?: string | null;
+  evaluation_version?: string | null;
 };
 
 // ---------------------------------------------------------------------------
@@ -485,3 +572,189 @@ export type LlmDiagnostics = {
   mode: string;
   model: string | null;
 } & Record<string, unknown>;
+
+// ---------------------------------------------------------------------------
+// EVALUATIONS — one assessment, addressable, with its provenance
+//
+// This is the half of the product that answers the auditor rather than the
+// recruiter. A competence score is a number on a screen; an evaluation is that
+// number plus the exact version of every input that produced it, plus the
+// ability to recompute it from stored evidence and prove the two agree.
+// ---------------------------------------------------------------------------
+
+/** `draft` is an interview in flight; `finalized` is the immutable record.
+ *  There is deliberately no "running" state — the live state is the session's. */
+export type EvaluationStatus = "draft" | "finalized";
+
+/**
+ * Which versions produced a number.
+ *
+ * `evaluation_version` is a HASH of the material inputs, not a counter. Two
+ * evaluations are comparable if and only if it matches; when it differs, the
+ * component versions say which part of the system moved. That distinction is
+ * the whole point, so the UI must never present it as a version number to be
+ * compared with `>`.
+ *
+ * `model_returned` is recorded but never hashed — a per-process observation
+ * cannot honestly be a per-evaluation identity input.
+ */
+export type ProvenanceOut = {
+  taxonomy_version: string;
+  taxonomy_hash: string;
+  rubric_version: string;
+  scoring_version: string;
+  question_policy_version: string;
+  prompt_versions: Record<string, string>;
+  code_version: string;
+  app_version: string;
+  llm_mode: string;
+  model_requested: string | null;
+  model_returned: string | null;
+  feature_flags: Record<string, string>;
+  evaluation_version: string;
+};
+
+export type EvaluationOut = {
+  id: string;
+  status: EvaluationStatus;
+  candidate_id: string;
+  candidate_name: string;
+  session_id: string;
+  role_id: string | null;
+  role_title: string | null;
+  job_family: string;
+  job_family_label: string;
+  created_at: string;
+  finalized_at: string | null;
+  resume_score: number;
+  weighted_evidence_score: number;
+  competence_score: number;
+  badge: Badge;
+  consistency_score: number;
+  contradiction_count: number;
+  role_coverage: number;
+  claims_scored: number;
+  questions_asked: number;
+  dimension_profile: DimensionScore[];
+  /** The weights this evaluation was scored under, SNAPSHOTTED. Configuration,
+   *  not evidence: `role_id` is SET NULL on delete, so without this a deleted
+   *  lens would make a finalized evaluation unexplainable. */
+  claim_weights: Record<string, number>;
+  dimension_weights: Record<string, number>;
+  provenance: ProvenanceOut;
+};
+
+/** One row of a candidate's evaluation history. Newest first from the API —
+ *  unlike `/outcomes`, which is oldest-first because it is read as a
+ *  progression. Do not "normalise" either one. */
+export type EvaluationSummary = {
+  id: string;
+  status: EvaluationStatus;
+  session_id: string;
+  role_id: string | null;
+  created_at: string;
+  finalized_at: string | null;
+  competence_score: number;
+  weighted_evidence_score: number;
+  badge: Badge;
+  evaluation_version: string;
+};
+
+/**
+ * GET /api/dev/provenance — the recruiter-facing stamp plus the material set
+ * the fingerprint is computed over, so "why do these two evaluations hash
+ * differently?" is a diff rather than an investigation.
+ *
+ * `fingerprint_material` is deliberately a subset of the same fields, not new
+ * ones: it is the answer to "what counts", and printing it next to what does
+ * NOT count is the only way a reader can trust the hash.
+ */
+export type ProvenanceStampOut = ProvenanceOut & {
+  fingerprint_material: Record<string, unknown>;
+  fingerprint_excludes: string[];
+};
+
+// ---------------------------------------------------------------------------
+// REPLAY — recompute the deterministic tail and diff it
+//
+// The contract, in full: extraction is recorded; everything downstream of
+// extraction is replayable. No model call, no regenerated question, no
+// re-created answer — which is why `llm_calls` on the result should always be
+// 0, and a non-zero value is itself the finding.
+// ---------------------------------------------------------------------------
+
+export type ReplayStatus = "MATCH" | "MISMATCH";
+
+export type ReplayDifference = {
+  field: string;
+  stored: string;
+  replayed: string;
+};
+
+export type ReplayResultOut = {
+  evaluation_id: string;
+  status: ReplayStatus;
+  replayed_at: string;
+  llm_calls: number;
+  claims_replayed: number;
+  answers_replayed: number;
+  differences: ReplayDifference[];
+  /** Which version inputs have moved since finalization. Populated whether or
+   *  not the numbers moved: the explanation for a MISMATCH, and the
+   *  reassurance behind a MATCH. */
+  provenance_drift: ReplayDifference[];
+  note: string;
+};
+
+// ---------------------------------------------------------------------------
+// HISTORY — what the evaluation said, and what a human then did about it
+// ---------------------------------------------------------------------------
+
+export type HistoryEntryKind =
+  | "evaluation_created"
+  | "evaluation_finalized"
+  | "decision";
+
+export type EvaluationHistoryEntry = {
+  kind: HistoryEntryKind;
+  at: string;
+  evaluation_id: string;
+  /** `decision` entries only. */
+  outcome_id: string | null;
+  decision: OutcomeDecision | null;
+  previous_decision: OutcomeDecision | null;
+  decided_by: string | null;
+  stage: string | null;
+  note: string | null;
+  /** Lifecycle entries only. */
+  competence_score: number | null;
+  badge: Badge | null;
+};
+
+export type EvaluationHistoryOut = {
+  evaluation_id: string;
+  candidate_id: string;
+  status: EvaluationStatus;
+  finalized_at: string | null;
+  competence_score: number;
+  badge: Badge;
+  current_decision: OutcomeDecision | null;
+  decisions_recorded: number;
+  entries: EvaluationHistoryEntry[];
+};
+
+// ---------------------------------------------------------------------------
+// tenancy
+// ---------------------------------------------------------------------------
+
+export type TenantCreateIn = { slug: string; name?: string | null };
+
+/** `api_key` appears in the provisioning response and NOWHERE else, ever.
+ *  Only its sha256 is stored, so a lost key is re-provisioned, never
+ *  recovered — which means a UI that shows it must say so. */
+export type TenantOut = {
+  id: string;
+  name: string;
+  slug: string;
+  api_key: string | null;
+};

@@ -17,7 +17,12 @@
  */
 
 import { safeGet, type ApiResult } from "./client";
-import type { CandidateGraph, LlmDiagnostics, RoutingExplanation } from "./types";
+import type {
+  CandidateGraph,
+  LlmDiagnostics,
+  ProvenanceStampOut,
+  RoutingExplanation,
+} from "./types";
 
 export function detectFamily(text: string): Promise<ApiResult<RoutingExplanation>> {
   return safeGet<RoutingExplanation>("/api/dev/detect", { text });
@@ -32,4 +37,15 @@ export function getLlmDiagnostics(): Promise<ApiResult<LlmDiagnostics>> {
  *  by the backend, so it is typed loosely and read defensively. */
 export function getFixture(): Promise<ApiResult<Partial<CandidateGraph>>> {
   return safeGet<Partial<CandidateGraph>>("/api/dev/fixture");
+}
+
+/**
+ * The full version stamp, human-readable.
+ *
+ * Richer than the `ProvenanceOut` on an evaluation: it also carries the
+ * material set the fingerprint is computed over, so "why do these two
+ * evaluations have different hashes?" is a diff rather than an investigation.
+ */
+export function getProvenanceStamp(): Promise<ApiResult<ProvenanceStampOut>> {
+  return safeGet<ProvenanceStampOut>("/api/dev/provenance");
 }

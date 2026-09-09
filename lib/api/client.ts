@@ -86,6 +86,12 @@ export class ApiError extends Error {
     return this.status === 401 || this.status === 403;
   }
 
+  /** Cloudflare 520-527: the edge answered because it could not reach the
+   *  origin. The application never saw the request. */
+  get isOriginDown(): boolean {
+    return this.status >= 520 && this.status <= 527;
+  }
+
   get isNotFound(): boolean {
     return this.status === 404;
   }
@@ -209,15 +215,20 @@ async function request<T>(path: string, options: RequestOptions = {}): Promise<T
       "ProofScreen-Frontend/1.0 (+https://github.com/nberi3109/ProofScreen_Next)",
   };
 
-  // An optional shared secret, for letting this caller past an edge that
-  // challenges everything else. Pair it with a WAF rule that skips protection
-  // when the header matches. Preferred over allowlisting IPs because a
-  // serverless platform's egress addresses are not stable, so an IP rule
-  // silently stops working on some later deploy.
+  // The tenant API key. The backend reads `X-API-Key` (api/tenancy.py) and
+  // resolves it to a tenant; with no header and REQUIRE_API_KEY=false it falls
+  // back to the development tenant, which is why today's calls work without
+  // one. Set this before turning REQUIRE_API_KEY on, not after.
   const apiKey = process.env.PROOFSCREEN_API_KEY?.trim();
-  if (apiKey) {
-    headers[process.env.PROOFSCREEN_API_KEY_HEADER?.trim() || "X-ProofScreen-Key"] = apiKey;
-  }
+  if (apiKey) headers["X-API-Key"] = apiKey;
+
+  // A SEPARATE secret for getting past a CDN or WAF that challenges
+  // server-to-server calls. Deliberately not the same value as the tenant key:
+  // one is an application credential, the other is shared with an edge
+  // provider, and they should never have to be rotated together.
+  const edgeSecret = process.env.PROOFSCREEN_EDGE_SECRET?.trim();
+  const edgeHeader = process.env.PROOFSCREEN_EDGE_HEADER?.trim() || "X-ProofScreen-Edge";
+  if (edgeSecret) headers[edgeHeader] = edgeSecret;
   let body: BodyInit | undefined;
   if (options.form) {
     // Content-Type is deliberately unset: fetch adds the multipart boundary.
@@ -340,6 +351,13 @@ async function fixtureFor(
   }
   const outcomes = path.match(/^\/api\/recruiter\/candidates\/([^/]+)\/outcomes$/);
   if (outcomes) return f.FIXTURE_OUTCOMES.map((o) => ({ ...o, candidate_id: outcomes[1] }));
+  const evals = path.match(/^\/api\/recruiter\/candidates\/([^/]+)\/evaluations$/);
+  if (evals) return f.fixtureEvaluations(evals[1]);
+  const history = path.match(/^\/api\/recruiter\/evaluations\/([^/]+)\/history$/);
+  if (history) return f.fixtureEvaluationHistory(history[1]);
+  const evaluation = path.match(/^\/api\/recruiter\/evaluations\/([^/]+)$/);
+  if (evaluation) return f.fixtureEvaluation(evaluation[1]);
+  if (path === "/api/dev/provenance") return f.FIXTURE_PROVENANCE_STAMP;
   const graph = path.match(/^\/api\/recruiter\/candidates\/([^/]+)$/);
   if (graph) {
     return f.fixtureGraph(graph[1], query?.role_id ? String(query.role_id) : null);
@@ -376,8 +394,28 @@ const CHALLENGE_MARKERS = [
   "challenge-platform",
 ];
 
+/**
+ * Cloudflare's 52x family: the edge is up, the origin is not.
+ *
+ *   520 unknown  521 connection refused  522 connect timeout
+ *   523 origin unreachable  524 origin timeout  525/526 TLS failure
+ *
+ * Every one of these means the request DIED AT THE EDGE and the application
+ * never saw it. That is the same fact as a connection refused, so it belongs
+ * in the same bucket — a red error box here would be reporting an API failure
+ * that the API had no part in.
+ *
+ * Deliberately not the whole 5xx range: a 500 or 503 from the application
+ * itself is a real bug in the application, and papering over that with
+ * plausible sample numbers is how a broken endpoint ships unnoticed.
+ */
+function isEdgeOriginError(error: ApiError): boolean {
+  return error.status >= 520 && error.status <= 527;
+}
+
 function unreachable(error: ApiError | ApiNotConfiguredError): boolean {
   if (error instanceof ApiNotConfiguredError || error.isUnreachable) return true;
+  if (isEdgeOriginError(error)) return true;
   if (!error.isForbidden || !error.via) return false;
   const haystack = error.detail.toLowerCase();
   return CHALLENGE_MARKERS.some((marker) => haystack.includes(marker));

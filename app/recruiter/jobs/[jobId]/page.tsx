@@ -11,7 +11,7 @@ import {
 } from "@/lib/api/format";
 import { buildOpening, claimKeyLabel } from "@/lib/api/openings";
 import { getRankedCandidates, getRole, getTaxonomy } from "@/lib/api/recruiter";
-import { DIMENSIONS } from "@/lib/api/types";
+import { COMPETENCE_DIMENSIONS } from "@/lib/api/types";
 
 /**
  * One opening: what it weights, and who its cohort is.
@@ -95,7 +95,7 @@ export default async function OpeningDetail({
     overridesDimensions
       ? lens.dimension_weights
       : (taxonomy?.ok ? taxonomy.data.dimension_weights : {}),
-    DIMENSIONS,
+    COMPETENCE_DIMENSIONS,
   );
   const topDimShare = dimensions[0]?.share ?? 0;
 

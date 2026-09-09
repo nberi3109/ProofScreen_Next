@@ -6,7 +6,11 @@ import { useActionState } from "react";
 import type { ActionResult } from "@/lib/api/actions";
 import { createRoleProfile } from "@/lib/api/actions";
 import { DIMENSION_LABEL, DIMENSION_MEANING, weightShares } from "@/lib/api/format";
-import { DIMENSIONS, type RoleOut, type TaxonomyFamily } from "@/lib/api/types";
+import {
+  COMPETENCE_DIMENSIONS,
+  type RoleOut,
+  type TaxonomyFamily,
+} from "@/lib/api/types";
 
 /**
  * Create a role lens: what THIS opening cares about, as weights.
@@ -42,7 +46,7 @@ export default function RoleProfileForm({
   // — an editor whose defaults all read zero invites a recruiter to type
   // something arbitrary over weights that were fine.
   const dimensionDefaults = new Map(
-    weightShares(taxonomy.dimension_weights, DIMENSIONS).map((entry) => [
+    weightShares(taxonomy.dimension_weights, COMPETENCE_DIMENSIONS).map((entry) => [
       entry.key,
       Math.round(entry.share),
     ]),
@@ -104,13 +108,13 @@ export default function RoleProfileForm({
         <legend>
           Dimension emphasis
           <small>
-            Which kinds of evidence count most. A role that lives on incidents
-            should lean on Authenticity; one that lives on numbers, on Metric
-            ownership.
+            Which kinds of evidence count most. A role that lives on
+            diagnosing failures should lean on Problem solving; one that lives
+            on defensible calls, on Judgment.
           </small>
         </legend>
         <div className="weight-grid">
-          {DIMENSIONS.map((dimension) => (
+          {COMPETENCE_DIMENSIONS.map((dimension) => (
             <label key={dimension} title={DIMENSION_MEANING[dimension]}>
               <span>{DIMENSION_LABEL[dimension]}</span>
               <input

@@ -24,6 +24,19 @@ import type {
 /** Short labels for the six dimensions. Names only — no re-ordering, no
  *  grouping, no "overall" synthesised from them. */
 export const DIMENSION_LABEL: Record<Dimension, string> = {
+  // Universal Competence Framework — the active set. These strings are the
+  // backend's own labels (api/engine/scoring.dimension_labels), copied rather
+  // than shortened: "Execution" and "Personal execution" are different claims,
+  // and "Ownership" loses the whole point of "Ownership boundary". A recruiter
+  // reading a screen has to be describing the same thing as a developer
+  // reading a log.
+  KNOWLEDGE: "Domain knowledge",
+  EXECUTION: "Personal execution",
+  PROBLEM_SOLVING: "Problem solving",
+  JUDGMENT: "Decision judgment",
+  OWNERSHIP: "Ownership boundary",
+  ADAPTABILITY: "Knowledge adaptability",
+  // Superseded, still rendered for evaluations finalized under them.
   SPECIFICITY: "Specificity",
   PROCESS: "Process",
   METRIC_OWNERSHIP: "Metric ownership",
@@ -35,6 +48,12 @@ export const DIMENSION_LABEL: Record<Dimension, string> = {
 /** What each dimension is actually asking, in a recruiter's words. Shown as
  *  help text so a low bar reads as a finding rather than a mystery. */
 export const DIMENSION_MEANING: Record<Dimension, string> = {
+  KNOWLEDGE: "Why the work works, not only what was done — the mechanism behind it.",
+  EXECUTION: "Evidence they personally did it, rather than were nearby while it happened.",
+  PROBLEM_SOLVING: "Diagnosing something that went wrong, rather than narrating a happy path.",
+  JUDGMENT: "A reasoned choice under a real constraint, including what they rejected.",
+  OWNERSHIP: "What they held versus what they handed off — the honest edge of the claim.",
+  ADAPTABILITY: "Applying what they know to a situation they were never actually in.",
   SPECIFICITY: "Concrete numbers, names and timeframes rather than adjectives.",
   PROCESS: "How the work actually ran, step by step.",
   METRIC_OWNERSHIP: "Whether they can define the metric they claim to have moved.",

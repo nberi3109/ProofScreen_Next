@@ -14,7 +14,7 @@ import {
   weightShares,
 } from "@/lib/api/format";
 import { buildCandidateOpening, claimKeyLabel } from "@/lib/api/openings";
-import { DIMENSIONS } from "@/lib/api/types";
+import { COMPETENCE_DIMENSIONS } from "@/lib/api/types";
 import { getCandidateGraph, getRole, getTaxonomy } from "@/lib/api/recruiter";
 import { getViewer } from "@/lib/api/viewer";
 
@@ -91,7 +91,7 @@ export default async function OpeningDetail({
     opening.overridesDimensions
       ? lens.dimension_weights
       : (taxonomy?.ok ? taxonomy.data.dimension_weights : {}),
-    DIMENSIONS,
+    COMPETENCE_DIMENSIONS,
   )
     .filter((entry) => entry.share > 0)
     .slice(0, 3);

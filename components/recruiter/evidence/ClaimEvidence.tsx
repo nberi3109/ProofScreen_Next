@@ -32,7 +32,7 @@ export default function ClaimEvidence({ claim }: { claim: ClaimGraph }) {
               </>
             ) : null}
             Role weight <b>{claim.weight.toFixed(1)}</b> · {claim.probed_dimensions}{" "}
-            of 6 dimensions probed
+            of {claim.dimensions.length} dimensions probed
           </p>
         </div>
         <div className={`claim-score ${unscored ? "" : `score-${scoreBand(claim.claim_score!)}`}`}>
