@@ -14,7 +14,7 @@ import type { CandidateSummary } from "@/lib/api/types";
  *
  * Retyped from the old mock `RecruiterCandidate` to `CandidateSummary`, the
  * shape the API actually returns. Three fields the mock had are gone because
- * ProofScreen stores none of them: `location`, `availability` and a
+ * Evident stores none of them: `location`, `availability` and a
  * `shineVerified` flag. The badge that replaces the last one is earned from
  * counted evidence rather than set by hand, which is the entire point of the
  * product — so a row that showed both would be advertising the weaker signal.

@@ -1,7 +1,7 @@
 /**
  * A ROLE LENS IS AN OPENING. This file is that claim, written down.
  *
- * The portal has "jobs"; ProofScreen has `JobRole` — a title, a job family,
+ * The portal has "jobs"; Evident has `JobRole` — a title, a job family,
  * claim weights and dimension weights. Those are not two things that happen to
  * look alike. A lens says *what this opening wants a candidate to prove*, and
  * `GET /api/recruiter/candidates?role_id=` says *who proved it best*. That is

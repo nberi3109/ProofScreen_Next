@@ -35,7 +35,7 @@ export default function ApplyButton({
   const whatsappNumber = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? "";
   const whatsappUrl = whatsappNumber
     ? `https://wa.me/${whatsappNumber.replace(/[^0-9]/g, "")}?text=${encodeURIComponent(
-        `Hi ProofScreen, I'd like to be considered for ${openingTitle}.`,
+        `Hi Evident, I'd like to be considered for ${openingTitle}.`,
       )}`
     : "";
 

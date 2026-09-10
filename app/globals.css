@@ -2760,7 +2760,7 @@ a {
 }
 
 /* =========================================================================
-   EVIDENCE UI — everything the ProofScreen API drives
+   EVIDENCE UI — everything the Evident API drives
    =========================================================================
    Added when the frontend was wired to the backend. Kept in one block at the
    end rather than interleaved, so it is obvious which rules belong to live
@@ -6010,4 +6010,27 @@ html {
   border-left: 2px solid #cfc6f6;
   padding-left: 11px;
   font-style: italic;
+}
+
+/* ---------------------------------------------------------------------------
+   BRAND — the Evident wordmark replaces the text logotype in both shells.
+   Appended so the earlier `.brand` type rules stay untouched; they simply have
+   nothing left to style once the anchor holds an image.
+   --------------------------------------------------------------------------- */
+.brand {
+  display: inline-flex;
+  align-items: center;
+  /* The link is the logo's box: no text leading to push it off-centre. */
+  line-height: 0;
+}
+.brand-logo {
+  display: block;
+  width: auto;
+  height: 28px;
+}
+/* The topbar drops to 56px below 420px; the mark comes down with it. */
+@media (max-width: 420px) {
+  .brand-logo {
+    height: 23px;
+  }
 }

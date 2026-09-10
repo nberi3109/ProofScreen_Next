@@ -5,7 +5,7 @@ import { getOpeningsForViewer, getViewer } from "@/lib/api/viewer";
 /**
  * Saved roles.
  *
- * ProofScreen has no saved-jobs table, so the set of ids is kept in the
+ * Evident has no saved-jobs table, so the set of ids is kept in the
  * browser and the openings behind them are fetched live. The page says so
  * rather than implying a server-side bookmark list exists.
  */

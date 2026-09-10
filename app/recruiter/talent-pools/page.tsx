@@ -10,7 +10,7 @@ import { getAllTaxonomy, getRankedCandidates } from "@/lib/api/recruiter";
  * Talent pools, which in this product are job families.
  *
  * A pool is "a group of candidates who belong together for the roles ahead",
- * and ProofScreen already has exactly one such grouping that means something:
+ * and Evident already has exactly one such grouping that means something:
  * the job family a resume routed to. It is not a label somebody applied by
  * hand — it decides which claim types the candidate was asked about and which
  * rubric weights scored them, so two people in the same pool were genuinely

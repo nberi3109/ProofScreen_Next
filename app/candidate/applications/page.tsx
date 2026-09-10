@@ -16,7 +16,7 @@ import type { OutcomeDecision } from "@/lib/api/types";
  * Where the candidate stands — their recorded decision trail.
  *
  * The mock version listed three invented applications with statuses like
- * "Proof requested". ProofScreen has no applications table, but it does have
+ * "Proof requested". Evident has no applications table, but it does have
  * the thing an application status is really reporting: the decisions a
  * recruiter recorded against this candidate, each optionally tied to the role
  * lens they were looking through. That is this page.

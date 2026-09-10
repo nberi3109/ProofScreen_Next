@@ -1,4 +1,5 @@
 import { Bell } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import type { ReactNode } from "react";
 
@@ -18,7 +19,14 @@ export default function CandidateShell({ children }: { children: ReactNode }) {
     <div className="app-shell">
       <header className="topbar">
         <Link href="/candidate" className="brand">
-          Skills<span>Proof</span>
+          <Image
+            src="/evident-logo.png"
+            alt="Evident"
+            width={970}
+            height={302}
+            className="brand-logo"
+            priority
+          />
         </Link>
 
         <nav className="desktop-nav">

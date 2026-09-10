@@ -1,7 +1,7 @@
 /**
  * THE CONTRACT, TYPESCRIPT SIDE.
  *
- * A hand-maintained mirror of `api/schemas.py` in the ProofScreen backend.
+ * A hand-maintained mirror of `api/schemas.py` in the Evident backend.
  * It is hand-written rather than generated on purpose: the backend is a
  * separate repository on a separate deploy, so a generator would need the
  * backend running at frontend build time and would couple two pipelines that

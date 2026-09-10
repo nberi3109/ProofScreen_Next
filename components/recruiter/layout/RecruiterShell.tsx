@@ -9,6 +9,7 @@ import {
   Stethoscope,
   Users,
 } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
@@ -18,7 +19,7 @@ import type { ReactNode } from "react";
  *
  * Navigation lists only screens the backend can actually serve. The mock
  * sub-navigation this replaced ("Advanced Search", "Manage Searches",
- * "Immediate Joiners") pointed at filters ProofScreen stores nothing for —
+ * "Immediate Joiners") pointed at filters Evident stores nothing for —
  * notice period, salary band, availability date — and a live dashboard with
  * dead controls on it is a dashboard nobody trusts twice.
  *
@@ -58,7 +59,14 @@ export default function RecruiterShell({
       <div className="recruiter-content">
         <header className="recruiter-topbar">
           <Link href="/recruiter" className="brand">
-            Proof<span>Screen</span>
+            <Image
+              src="/evident-logo.png"
+              alt="Evident"
+              width={970}
+              height={302}
+              className="brand-logo"
+              priority
+            />
           </Link>
 
           <nav className="recruiter-main-nav">

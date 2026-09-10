@@ -73,7 +73,7 @@ function fail<T>(error: string, field?: string): ActionResult<T> {
 function describe(error: unknown): string {
   if (error instanceof ApiNotConfiguredError) return error.message;
   if (error instanceof ApiError) {
-    if (error.isUnreachable) return `The ProofScreen API is unreachable — ${error.detail}.`;
+    if (error.isUnreachable) return `The Evident API is unreachable — ${error.detail}.`;
     return error.detail;
   }
   if (error instanceof Error) return error.message;

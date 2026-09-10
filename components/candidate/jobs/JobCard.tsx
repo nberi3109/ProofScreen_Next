@@ -15,7 +15,7 @@ import { familyLabel } from "@/lib/api/format";
  * One opening, from the candidate's side.
  *
  * The mock version carried a company name, a logo colour, a salary band, a
- * location and a made-up match score. ProofScreen stores none of those, so the
+ * location and a made-up match score. Evident stores none of those, so the
  * card now shows what an opening genuinely is: a job family, the claim types
  * it weights most, and — once the candidate has a completed verification —
  * the backend's own role-coverage figure for them under this specific lens.

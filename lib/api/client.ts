@@ -1,5 +1,5 @@
 /**
- * The single place this app talks to the ProofScreen backend.
+ * The single place this app talks to the Evident backend.
  *
  * WHY EVERY CALL IS SERVER-SIDE
  * -----------------------------
@@ -49,7 +49,7 @@ export class ApiNotConfiguredError extends Error {
   constructor() {
     super(
       `${API_BASE_URL_ENV} is not set. Copy .env.example to .env.local and ` +
-        `point it at the running ProofScreen API (default http://127.0.0.1:8000).`,
+        `point it at the running Evident API (default http://127.0.0.1:8000).`,
     );
     this.name = "ApiNotConfiguredError";
   }

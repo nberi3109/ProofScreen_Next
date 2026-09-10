@@ -10,7 +10,7 @@ import { OUTCOME_DECISIONS, type OutcomeOut, type RoleOut } from "@/lib/api/type
 /**
  * Where a human decision enters the system.
  *
- * Everything else on this page is ProofScreen's opinion. These rows are the
+ * Everything else on this page is Evident's opinion. These rows are the
  * independent variable the whole product is measured against — the validation
  * report rank-correlates competence scores against them — which is why the
  * form asks which role lens the recruiter was looking through, and why the

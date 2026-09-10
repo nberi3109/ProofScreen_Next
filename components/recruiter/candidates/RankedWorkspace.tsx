@@ -18,7 +18,7 @@ import type { Badge, CandidateSummary, RankedCandidates } from "@/lib/api/types"
  * the list the API returned, nothing else.
  *
  * Every control maps to a field the API actually sends. There is no
- * notice-period, salary or availability filter, because ProofScreen stores
+ * notice-period, salary or availability filter, because Evident stores
  * none of those, and a dropdown that silently does nothing is worse than an
  * absent one.
  *

@@ -25,7 +25,7 @@ export default function ApiNotice({
           <b>The frontend does not know where the API is.</b>
           <p>
             {API_BASE_URL_ENV} is unset. Copy <code>.env.example</code> to{" "}
-            <code>.env.local</code> and point it at the running ProofScreen API.
+            <code>.env.local</code> and point it at the running Evident API.
           </p>
         </div>
       </div>
@@ -37,7 +37,7 @@ export default function ApiNotice({
       <div className="api-notice api-notice-down">
         <ServerCrash size={18} />
         <div>
-          <b>The ProofScreen API is not responding.</b>
+          <b>The Evident API is not responding.</b>
           <p>
             Could not load {what} — {error.detail}. Start the backend
             (<code>uvicorn api.main:app --reload</code> or{" "}

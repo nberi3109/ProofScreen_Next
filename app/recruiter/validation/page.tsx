@@ -14,7 +14,7 @@ import type { ValidationCohort } from "@/lib/api/types";
 /**
  * M4 — does evidence outrank resume screening?
  *
- * This is the one screen in the product that can say ProofScreen does not
+ * This is the one screen in the product that can say Evident does not
  * work, which is exactly why it ships. It rank-correlates the competence score
  * against recorded human decisions, and prints the resume score's correlation
  * against the SAME decisions right next to it. If the resume column wins, the
@@ -105,7 +105,7 @@ export default async function ValidationPage({
               <p>
                 <b>Inversions caught</b> counts candidates in the top quartile
                 by resume and the bottom quartile by evidence whom the recruiter
-                rejected — the case ProofScreen exists to find.
+                rejected — the case Evident exists to find.
               </p>
               <p className="method-caveat">
                 <FlaskConical size={13} /> The same{" "}

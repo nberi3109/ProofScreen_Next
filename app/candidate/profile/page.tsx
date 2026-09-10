@@ -21,7 +21,7 @@ import { getViewer } from "@/lib/api/viewer";
  *
  * Everything the mock version showed — a name, a headline, four years of
  * experience, a salary expectation, a resume filename — was invented. What
- * ProofScreen actually knows about a candidate is narrower and more useful:
+ * Evident actually knows about a candidate is narrower and more useful:
  * the claims pulled out of their resume, which of those were probed, how they
  * scored per dimension, and whether their answers stayed consistent. So that
  * is what this page is.

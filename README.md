@@ -1,4 +1,4 @@
-# ProofScreen — frontend
+# Evident — frontend
 
 The recruiter dashboard and candidate intake for [ProofScreen](../proofscreen).
 Next.js 16 (App Router), React 19, deployed **separately** from the API.
@@ -121,7 +121,7 @@ Every screen below reads live data. There is no mock data layer any more —
 
 ### A role lens is an opening
 
-The portal has "jobs"; ProofScreen has `JobRole` — a title, a job family,
+The portal has "jobs"; Evident has `JobRole` — a title, a job family,
 claim weights and dimension weights. Those are not two things that resemble
 each other. A lens says *what an opening wants proved*, and
 `GET /recruiter/candidates?role_id=` says *who proved it best*. That is an

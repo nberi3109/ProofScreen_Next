@@ -6,7 +6,7 @@ import { useEffect, useState } from "react";
 /**
  * Save an opening for later.
  *
- * ProofScreen has no "saved" table and adding one is a backend change nobody
+ * Evident has no "saved" table and adding one is a backend change nobody
  * asked for, so this keeps the list in `localStorage`. Being honest about what
  * that means: it is per-browser and per-device, it is not visible to a
  * recruiter, and clearing site data clears it. That is a real feature with
