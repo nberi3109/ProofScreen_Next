@@ -9,6 +9,7 @@ import DimensionBar from "@/components/recruiter/evidence/DimensionBar";
 import DimensionRadar from "@/components/recruiter/evidence/DimensionRadar";
 import EvaluationsPanel from "@/components/recruiter/evidence/EvaluationsPanel";
 import OutcomePanel from "@/components/recruiter/evidence/OutcomePanel";
+import SendToManager from "@/components/recruiter/evidence/SendToManager";
 import { recordOutcome } from "@/lib/api/actions";
 import {
   BADGE_LABEL,
@@ -251,6 +252,22 @@ export default async function CandidateEvidencePage({
             outcomes={outcomes.ok ? outcomes.data : []}
             roles={roles.ok ? roles.data : []}
             activeRoleId={roleId}
+          />
+
+          {/* The step after shortlisting. Every figure in the preview is read
+              off this same graph, so the mocked-up email is an honest picture
+              of what it would carry. */}
+          <SendToManager
+            candidateName={graph.candidate.name}
+            candidateRole={graph.candidate.role}
+            familyLabel={familyLabel(graph.job_family, graph.job_family_label)}
+            lensTitle={graph.scored_for?.title ?? null}
+            dims={graph.dimension_profile}
+            competence={graph.competence_score}
+            resumeScore={graph.resume_score}
+            roleCoverage={graph.role_coverage}
+            questionsAsked={graph.questions_asked}
+            badge={graph.badge}
           />
 
           {evaluations.ok ? (
