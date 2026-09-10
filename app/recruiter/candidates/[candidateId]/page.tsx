@@ -1,4 +1,4 @@
-import { ArrowLeft, Compass, Phone } from "lucide-react";
+import { ArrowLeft, ChevronDown, Compass, Phone } from "lucide-react";
 import Link from "next/link";
 
 import ApiNotice, { EmptyNotice } from "@/components/api/ApiNotice";
@@ -6,6 +6,7 @@ import RoleLens from "@/components/recruiter/candidates/RoleLens";
 import ClaimEvidence from "@/components/recruiter/evidence/ClaimEvidence";
 import ConsistencyPanel from "@/components/recruiter/evidence/ConsistencyPanel";
 import DimensionBar from "@/components/recruiter/evidence/DimensionBar";
+import DimensionRadar from "@/components/recruiter/evidence/DimensionRadar";
 import EvaluationsPanel from "@/components/recruiter/evidence/EvaluationsPanel";
 import OutcomePanel from "@/components/recruiter/evidence/OutcomePanel";
 import { recordOutcome } from "@/lib/api/actions";
@@ -187,6 +188,8 @@ export default async function CandidateEvidencePage({
                 </>
               )}
             </p>
+            <DimensionRadar dims={graph.dimension_profile} />
+
             <div className="dim-list">
               {graph.dimension_profile.map((dim) => (
                 <DimensionBar dim={dim} key={dim.dimension} />
@@ -194,26 +197,45 @@ export default async function CandidateEvidencePage({
             </div>
           </section>
 
-          <div className="recruiter-section-head">
-            <h2>
-              Claims &amp; evidence — {probedClaims.length} of {graph.claims.length}{" "}
-              probed
-            </h2>
-          </div>
-
           {graph.claims.length === 0 ? (
-            <EmptyNotice title="No claims extracted from this resume.">
-              <p>
-                Nothing in the document scored high enough to be treated as a
-                verifiable claim.
-              </p>
-            </EmptyNotice>
+            <>
+              <div className="recruiter-section-head">
+                <h2>Claims &amp; evidence</h2>
+              </div>
+              <EmptyNotice title="No claims extracted from this resume.">
+                <p>
+                  Nothing in the document scored high enough to be treated as a
+                  verifiable claim.
+                </p>
+              </EmptyNotice>
+            </>
           ) : (
-            <div className="claim-list">
-              {graph.claims.map((claim) => (
-                <ClaimEvidence claim={claim} key={claim.id} />
-              ))}
-            </div>
+            /* Collapsed by default. The full evidence for three claims runs
+               several screens of quotes and transcript, which buried the
+               dimension profile and the decision panel — the two things a
+               recruiter reads first. A plain <details> rather than a state
+               toggle: no client JavaScript, the content stays in the HTML for
+               search and print, and it is keyboard-operable for free. */
+            <details className="claims-disclosure">
+              <summary>
+                <span className="claims-disclosure-head">
+                  Claims &amp; evidence — {probedClaims.length} of{" "}
+                  {graph.claims.length} probed
+                </span>
+                <span className="claims-disclosure-cue">
+                  <b>
+                    Show all {graph.claims.length}{" "}
+                    {graph.claims.length === 1 ? "claim" : "claims"}
+                  </b>
+                  <ChevronDown size={16} />
+                </span>
+              </summary>
+              <div className="claim-list">
+                {graph.claims.map((claim) => (
+                  <ClaimEvidence claim={claim} key={claim.id} />
+                ))}
+              </div>
+            </details>
           )}
         </div>
 
