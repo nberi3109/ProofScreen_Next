@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 
 export default function CandidateLogin() {
@@ -5,7 +6,14 @@ export default function CandidateLogin() {
     <main className="auth-page">
       <div className="auth-card">
         <Link href="/candidate" className="brand">
-          Skills<span>Proof</span>
+          <Image
+            src="/evident-logo.png"
+            alt="Evident"
+            width={970}
+            height={302}
+            className="brand-logo"
+            priority
+          />
         </Link>
         <span className="eyebrow">CANDIDATE SPACE</span>
         <h1>Turn your experience into proof.</h1>

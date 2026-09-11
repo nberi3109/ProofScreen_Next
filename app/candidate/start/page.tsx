@@ -30,7 +30,7 @@ export default async function CandidateStartPage({
       <div className="hero">
         <div>
           <span className="mini-label">
-            <ShieldCheck size={13} /> PROOFSCREEN
+            <ShieldCheck size={13} /> EVIDENT
           </span>
           <h1>Turn a resume into evidence.</h1>
           <p>

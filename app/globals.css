@@ -6510,3 +6510,9 @@ text.radar-axis-value.score-weak {
     width: 100%;
   }
 }
+
+/* The two login cards carry the mark at 410px wide with nothing else near it,
+   so the 28px topbar height reads as an afterthought there. Four pixels up. */
+.auth-card .brand-logo {
+  height: 32px;
+}

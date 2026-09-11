@@ -46,7 +46,7 @@ export default async function RecruiterHome() {
       <main className="recruiter-page">
         <div className="recruiter-heading">
           <div>
-            <span className="eyebrow">PROOFSCREEN</span>
+            <span className="eyebrow">EVIDENT</span>
             <h1>Evidence dashboard</h1>
           </div>
         </div>
@@ -80,7 +80,7 @@ export default async function RecruiterHome() {
     <main className="recruiter-page">
       <div className="recruiter-heading">
         <div>
-          <span className="eyebrow">PROOFSCREEN</span>
+          <span className="eyebrow">EVIDENT</span>
           <h1>Evidence dashboard</h1>
           <p>
             {candidates.length}{" "}

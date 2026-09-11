@@ -136,7 +136,7 @@ export default function IntakeForm({
           </label>
         )}
 
-        <label className="intake-textarea">
+        {/* <label className="intake-textarea">
           Job description <small>optional</small>
           <textarea
             name="job_description"
@@ -147,7 +147,7 @@ export default function IntakeForm({
             Used to route the resume to the right claim taxonomy. Leave it blank
             and the job family is detected from the resume itself.
           </small>
-        </label>
+        </label> */}
 
         {roles.length > 0 && (
           <label>

@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 
 export default function RecruiterLogin() {
@@ -5,7 +6,14 @@ export default function RecruiterLogin() {
     <main className="auth-page">
       <div className="auth-card">
         <Link href="/recruiter" className="brand">
-          Skills<span>Proof</span>
+          <Image
+            src="/evident-logo.png"
+            alt="Evident"
+            width={970}
+            height={302}
+            className="brand-logo"
+            priority
+          />
         </Link>
         <span className="eyebrow">RECRUITER WORKSPACE</span>
         <h1>Find the proof behind the resume.</h1>
